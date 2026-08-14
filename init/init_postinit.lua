@@ -1,0 +1,1 @@
+modimport("postinit/prefabs/world")
