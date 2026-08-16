@@ -1,4 +1,4 @@
-name = "田园风"
+name = "归园田居"
 description = [[
 国风田园模拟经营。
 小岛耕作、商人交易、繁荣扩张、反哺饥荒。
@@ -34,5 +34,15 @@ configuration_options = {
 			{ description = "English", data = "en" },
 		},
 		default = "zh",
+	},
+	{
+		name = "paddy_creature_ripple",
+		label = "水田生物波纹 / Creature ripples",
+		hover = "地面生物站在湿田上时，脚下是否显示波纹",
+		options = {
+			{ description = "开启 / On", data = true, hover = "湿田上的地面生物显示脚下波纹" },
+			{ description = "关闭 / Off", data = false, hover = "不显示生物波纹（掉落物漂浮波纹不受影响）" },
+		},
+		default = true,
 	},
 }

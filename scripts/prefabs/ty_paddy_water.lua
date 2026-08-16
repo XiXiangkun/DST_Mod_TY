@@ -1,19 +1,19 @@
 --[[
-	水田水面（第一版占位：复用官方 wave_shore）
-	贴地水纹 + 可检查水位（已关闭 DynamicShadow）
+	水田水面（ty_paddy_wave）
+	贴地水纹 + 可检查水位
 ]]
 
 local assets =
 {
-	Asset("ANIM", "anim/wave_shore.zip"),
+	Asset("ANIM", "anim/ty_paddy_wave.zip"),
 }
 
 local TIER_ANIM =
 {
-	full = "idle_med",
-	mid = "idle_small",
-	shallow = "idle_small2",
-	nearly_dry = "idle_small3",
+	full = "idle",
+	mid = "idle",
+	shallow = "idle",
+	nearly_dry = "idle",
 }
 
 local TIER_ALPHA =
@@ -66,7 +66,7 @@ local function ApplyVisual(inst)
 	end
 
 	inst:Show()
-	local anim = TIER_ANIM[tier] or "idle_small"
+	local anim = TIER_ANIM[tier] or "idle"
 	if not inst.AnimState:IsCurrentAnimation(anim) then
 		inst.AnimState:PlayAnimation(anim, true)
 		inst._ty_anim_phased = false
@@ -92,6 +92,17 @@ end
 
 local function GetDescribe(inst, viewer)
 	local water = inst._water ~= nil and inst._water:value() or 0
+	-- 检查走主机；从 manager 读当前水量，避免档内扣水时百分比滞后
+	if TheWorld.ismastersim and inst.ty_tile_x ~= nil then
+		local mgr = TheWorld.components.ty_paddy_manager
+		if mgr ~= nil then
+			local live = mgr:GetWater(inst.ty_tile_x, inst.ty_tile_y)
+			if live ~= nil then
+				water = live
+			end
+		end
+	end
+
 	local tier = GetTier(water)
 	local lang = TUNING.TY_LANG or "zh"
 	local tier_name = (lang == "en" and TIER_NAME_EN[tier] or TIER_NAME_ZH[tier]) or tier
@@ -113,27 +124,6 @@ local function SetPaddyWater(inst, water)
 	ApplyVisual(inst)
 end
 
-local function OnSave(inst, data)
-	data.water = inst._water:value()
-	data.tx = inst.ty_tile_x
-	data.ty = inst.ty_tile_y
-end
-
-local function OnLoad(inst, data)
-	if data == nil then
-		return
-	end
-	inst.ty_tile_x = data.tx
-	inst.ty_tile_y = data.ty
-	if data.water ~= nil then
-		inst:DoTaskInTime(0, function()
-			if inst:IsValid() then
-				inst:SetPaddyWater(data.water)
-			end
-		end)
-	end
-end
-
 local function fn()
 	local inst = CreateEntity()
 
@@ -141,18 +131,18 @@ local function fn()
 	inst.entity:AddAnimState()
 	inst.entity:AddNetwork()
 
-	inst.AnimState:SetBuild("wave_shore")
-	inst.AnimState:SetBank("wave_shore")
-	inst.AnimState:PlayAnimation("idle_big", true)
+	inst.AnimState:SetBuild("ty_paddy_wave")
+	inst.AnimState:SetBank("ty_paddy_wave")
+	inst.AnimState:PlayAnimation("idle", true)
 	inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
 	inst.AnimState:SetLayer(LAYER_BACKGROUND)
 	inst.AnimState:SetSortOrder(3)
-	-- 不用 SetOceanBlendParams：官方岸浪会按海洋色（偏深青绿）染色，水田上会发黑
-	-- 地皮本身不会改 AnimState 颜色；半透明时底下田皮透上来会显得浑一点
+
+	inst.Transform:SetScale(1.2, 1.2, 1.2)
 
 	inst:AddTag("NOBLOCK")
 	inst:AddTag("ty_paddy_water")
-	-- 第一版可检查水位：不加 FX / NOCLICK，便于鼠标指向
+	-- 可检查水位：不加 FX / NOCLICK，便于鼠标指向
 
 	inst._water = net_float(inst.GUID, "ty_paddy_water._water", "waterdirty")
 	inst._water:set(1)
@@ -171,8 +161,6 @@ local function fn()
 	inst.components.inspectable.descriptionfn = GetDescribe
 
 	inst.SetPaddyWater = SetPaddyWater
-	inst.OnSave = OnSave
-	inst.OnLoad = OnLoad
 
 	inst:DoTaskInTime(0, ApplyVisual)
 

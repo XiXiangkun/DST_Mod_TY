@@ -1,38 +1,52 @@
 local lang = GetModConfigData("language") or "zh"
 TUNING.TY_LANG = lang
 
-local STR = {
-	zh = {
-		NAMES = {
-			TY_PADDY_WATER = "水田水面",
-		},
-		CHARACTERS = {
-			GENERIC = {
-				DESCRIBE = {
-					TY_PADDY_WATER = "田里的水，会慢慢干下去。",
-				},
-			},
-		},
-	},
-	en = {
-		NAMES = {
-			TY_PADDY_WATER = "Paddy Water",
-		},
-		CHARACTERS = {
-			GENERIC = {
-				DESCRIBE = {
-					TY_PADDY_WATER = "Flooded field water. It will dry out over time.",
-				},
-			},
-		},
-	},
-}
-
-local t = STR[lang] or STR.zh
-
-for k, v in pairs(t.NAMES) do
-	STRINGS.NAMES[k] = v
-end
-for k, v in pairs(t.CHARACTERS.GENERIC.DESCRIBE) do
-	STRINGS.CHARACTERS.GENERIC.DESCRIBE[k] = v
+if lang == "en" then
+	STRINGS.NAMES.TY_PADDY_WATER = "Paddy Water"
+	STRINGS.NAMES.TY_RICE_SEEDS_1 = "Rice Seeds I"
+	STRINGS.NAMES.TY_RICE_SEEDS_2 = "Rice Seeds II"
+	STRINGS.NAMES.TY_RICE_SEEDS_3 = "Rice Seeds III"
+	STRINGS.NAMES.TY_RICE_SEEDS_4 = "Rice Seeds IV"
+	STRINGS.NAMES.TY_RICE_SEEDS_5 = "Rice Seeds V"
+	STRINGS.NAMES.TY_RICE_1 = "Rice I"
+	STRINGS.NAMES.TY_RICE_2 = "Rice II"
+	STRINGS.NAMES.TY_RICE_3 = "Rice III"
+	STRINGS.NAMES.TY_RICE_4 = "Rice IV"
+	STRINGS.NAMES.TY_RICE_5 = "Rice V"
+	STRINGS.NAMES.TY_RICE_PANICLE = "Rice Panicle"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "First-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_2 = "Second-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_3 = "Third-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_4 = "Fourth-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_5 = "Fifth-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_1 = "Young rice of the first lineage."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_2 = "Young rice of the second lineage."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_3 = "Young rice of the third lineage."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_4 = "Young rice of the fourth lineage."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_5 = "Hardy rice that regrows after harvest."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_PANICLE = "A placeholder rice panicle."
+else
+	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
+	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子·一"
+	STRINGS.NAMES.TY_RICE_SEEDS_2 = "水稻种子·二"
+	STRINGS.NAMES.TY_RICE_SEEDS_3 = "水稻种子·三"
+	STRINGS.NAMES.TY_RICE_SEEDS_4 = "水稻种子·四"
+	STRINGS.NAMES.TY_RICE_SEEDS_5 = "水稻种子·五"
+	STRINGS.NAMES.TY_RICE_1 = "水稻·一"
+	STRINGS.NAMES.TY_RICE_2 = "水稻·二"
+	STRINGS.NAMES.TY_RICE_3 = "水稻·三"
+	STRINGS.NAMES.TY_RICE_4 = "水稻·四"
+	STRINGS.NAMES.TY_RICE_5 = "水稻·五"
+	STRINGS.NAMES.TY_RICE_PANICLE = "稻穗"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "一期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_2 = "二期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_3 = "三期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_4 = "四期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_5 = "五期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_1 = "一期水稻。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_2 = "二期水稻。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_3 = "三期水稻。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_4 = "四期水稻。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_5 = "五期水稻，收获后会重新生长。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_PANICLE = "稻穗（占位）。"
 end

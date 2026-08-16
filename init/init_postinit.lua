@@ -1,1 +1,5 @@
 modimport("postinit/prefabs/world")
+modimport("postinit/components/floater")
+modimport("postinit/components/inventoryitem")
+modimport("postinit/components/inventoryitemmoisture")
+modimport("postinit/components/wateryprotection")
