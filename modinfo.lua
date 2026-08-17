@@ -5,7 +5,7 @@ description = [[
 
 当前测试内容：稻鱼共生。
 ]]
-author = "你要帮帮威吊"
+author = "素冥；你要帮帮威吊"
 version = "0.0.1"
 forumthread = ""
 

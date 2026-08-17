@@ -1,10 +1,12 @@
 --[[
 	主机：水田水量（八向连通水域统一水位）、日耗、雨水补给、地皮湿/干与水面实体。
-	水分按秒结算（OnUpdate + LongUpdate），跳时间会一起推进。
+	一格一塘养殖：鱼/虾苗、繁殖、游鱼/虾 FX、干涸掉落。
+	水分与繁殖按秒结算（OnUpdate + LongUpdate），跳时间会一起推进。
 ]]
 
 local FLOATER_SCAN_RADIUS = (TILE_SCALE or 4) * 0.75
 local FLOATER_CANT_TAGS = { "INLIMBO", "player", "FX", "DECOR", "CLASSIFIED", "ty_paddy_water" }
+local AQUA_FX_TAGS = { "ty_fish_fx", "ty_shrimp_fx" }
 
 -- 八邻接（含斜角）
 local NEIGHBOR_OFFSETS = {
@@ -63,9 +65,46 @@ local function GetTier(water)
 	end
 end
 
+local function GetAquaMax(kind)
+	if kind == "shrimp" then
+		return TUNING.TY_AQUA_SHRIMP_MAX or 2
+	end
+	return TUNING.TY_AQUA_FISH_MAX or 4
+end
+
+local function GetAquaDropPrefab(kind)
+	if kind == "shrimp" then
+		return TUNING.TY_AQUA_SHRIMP_DROP or "wobster_sheller_land"
+	end
+	return TUNING.TY_AQUA_FISH_DROP or "pondfish"
+end
+
+local function GetAquaFxPrefab(kind)
+	if kind == "shrimp" then
+		return "ty_shrimp_fx"
+	end
+	return "ty_fish_fx"
+end
+
+local function NormalizeAqua(aqua)
+	if aqua == nil or (aqua.kind ~= "fish" and aqua.kind ~= "shrimp") then
+		return nil
+	end
+	local max = GetAquaMax(aqua.kind)
+	local count = math.max(0, math.floor(aqua.count or 0))
+	if count > max then
+		count = max
+	end
+	return {
+		kind = aqua.kind,
+		count = count,
+		breed_t = math.max(0, aqua.breed_t or 0),
+	}
+end
+
 local TyPaddyManager = Class(function(self, inst)
 	self.inst = inst
-	self.tiles = {} -- [key] = { water = 0~1 }
+	self.tiles = {} -- [key] = { water = 0~1, aqua = { kind, count, breed_t }? }
 
 	self.inst:StartUpdatingComponent(self)
 end)
@@ -227,11 +266,13 @@ end
 function TyPaddyManager:OnUpdate(dt)
 	self:ApplyWaterLoss(dt)
 	self:ApplyRainGain(dt)
+	self:ApplyAquaBreeding(dt)
 end
 
 function TyPaddyManager:LongUpdate(dt)
 	self:ApplyWaterLoss(dt)
 	self:ApplyRainGain(dt)
+	self:ApplyAquaBreeding(dt)
 end
 
 --------------------------------------------------------------------------
@@ -284,6 +325,16 @@ function TyPaddyManager:GetTier(tx, ty)
 	return GetTier(water)
 end
 
+function TyPaddyManager:GetAqua(tx, ty)
+	local data = self.tiles[TileKey(tx, ty)]
+	return data ~= nil and data.aqua or nil
+end
+
+function TyPaddyManager:GetAquaAtPoint(x, y, z)
+	local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, y, z)
+	return self:GetAqua(tx, ty)
+end
+
 --------------------------------------------------------------------------
 -- 写水位（整片水域）
 
@@ -305,10 +356,16 @@ function TyPaddyManager:ApplyTileWaterState(tx, ty, water, prev_water)
 		end
 	end
 
+	-- 干涸：先掉落鱼虾并清养殖，再刷水面
+	if was_wet and not now_wet then
+		self:HarvestAqua(tx, ty)
+	end
+
 	local prev_tier = GetTier(was_wet and prev_water or 0)
 	local now_tier = GetTier(now_wet and water or 0)
 	if was_wet ~= now_wet or prev_tier ~= now_tier then
 		self:SyncVisual(tx, ty)
+		self:SyncAquaVisual(tx, ty)
 	elseif now_wet and WaterDisplayBucket(prev_water) ~= WaterDisplayBucket(water) then
 		-- 同档内只按 1% 精度刷检查用数值，避免每帧 set net 导致闪烁
 		local ent = self:FindWaterEnt(tx, ty)
@@ -470,12 +527,167 @@ function TyPaddyManager:SyncVisual(tx, ty)
 end
 
 --------------------------------------------------------------------------
+-- 养殖（一格一塘）
+
+function TyPaddyManager:FindAquaFx(tx, ty)
+	local cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+	local ents = TheSim:FindEntities(cx, cy, cz, 0.75, nil, nil, AQUA_FX_TAGS)
+	for i = 1, #ents do
+		local ent = ents[i]
+		if ent ~= nil and ent:IsValid() and ent.ty_tile_x == tx and ent.ty_tile_y == ty then
+			return ent
+		end
+	end
+	return nil
+end
+
+function TyPaddyManager:RemoveAquaFx(tx, ty)
+	local cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+	local ents = TheSim:FindEntities(cx, cy, cz, 0.75, nil, nil, AQUA_FX_TAGS)
+	for i = 1, #ents do
+		local ent = ents[i]
+		if ent ~= nil and ent:IsValid() then
+			if ent.ty_tile_x == nil or (ent.ty_tile_x == tx and ent.ty_tile_y == ty) then
+				ent:Remove()
+			end
+		end
+	end
+end
+
+function TyPaddyManager:SyncAquaVisual(tx, ty)
+	local info = self.tiles[TileKey(tx, ty)]
+	if info == nil then
+		self:RemoveAquaFx(tx, ty)
+		return
+	end
+
+	local aqua = info.aqua
+	local wet = IsVisiblyWet(info.water)
+	if not wet or aqua == nil or (aqua.count or 0) < 1 then
+		self:RemoveAquaFx(tx, ty)
+		return
+	end
+
+	local want = GetAquaFxPrefab(aqua.kind)
+	local fx = self:FindAquaFx(tx, ty)
+	if fx ~= nil and not fx:HasTag(want) then
+		fx:Remove()
+		fx = nil
+	end
+
+	if fx == nil then
+		fx = SpawnPrefab(want)
+		if fx == nil then
+			return
+		end
+		local cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+		fx.Transform:SetPosition(cx, cy, cz)
+		fx.ty_tile_x = tx
+		fx.ty_tile_y = ty
+	end
+end
+
+-- 投放苗种：成功 true；失败 false, 已有 kind（用于提示语）
+function TyPaddyManager:TryStockAqua(tx, ty, kind)
+	if kind ~= "fish" and kind ~= "shrimp" then
+		return false, nil
+	end
+	local key = TileKey(tx, ty)
+	local info = self.tiles[key]
+	if info == nil or not IsVisiblyWet(info.water) then
+		return false, nil
+	end
+	if info.aqua ~= nil then
+		return false, info.aqua.kind
+	end
+	info.aqua = { kind = kind, count = 0, breed_t = 0 }
+	return true
+end
+
+function TyPaddyManager:TryStockAquaAtPoint(x, y, z, kind)
+	local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, y, z)
+	return self:TryStockAqua(tx, ty, kind)
+end
+
+function TyPaddyManager:HarvestAqua(tx, ty)
+	local key = TileKey(tx, ty)
+	local info = self.tiles[key]
+	if info == nil or info.aqua == nil then
+		self:RemoveAquaFx(tx, ty)
+		return
+	end
+
+	local aqua = info.aqua
+	local count = math.max(0, math.floor(aqua.count or 0))
+	local drop = GetAquaDropPrefab(aqua.kind)
+	info.aqua = nil
+	self:RemoveAquaFx(tx, ty)
+
+	if count <= 0 or drop == nil then
+		return
+	end
+
+	local cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+	for _ = 1, count do
+		local ent = SpawnPrefab(drop)
+		if ent ~= nil then
+			local angle = math.random() * 2 * PI
+			local r = 0.25 + math.random() * 0.55
+			ent.Transform:SetPosition(cx + math.cos(angle) * r, 0, cz + math.sin(angle) * r)
+			if ent.components.inventoryitem ~= nil then
+				ent.components.inventoryitem:OnDropped(true)
+			end
+		end
+	end
+end
+
+function TyPaddyManager:ApplyAquaBreeding(dt)
+	if dt == nil or dt <= 0 then
+		return
+	end
+	local breed_time = TUNING.TY_AQUA_BREED_TIME or ((TUNING.TOTAL_DAY_TIME or 480) * 0.5)
+	if breed_time <= 0 then
+		return
+	end
+
+	for key, info in pairs(self.tiles) do
+		local aqua = info.aqua
+		if aqua ~= nil and IsVisiblyWet(info.water) then
+			local max = GetAquaMax(aqua.kind)
+			if (aqua.count or 0) < max then
+				aqua.breed_t = (aqua.breed_t or 0) + dt
+				local changed = false
+				while aqua.breed_t >= breed_time and aqua.count < max do
+					aqua.breed_t = aqua.breed_t - breed_time
+					aqua.count = aqua.count + 1
+					changed = true
+				end
+				if changed then
+					local tx, ty = ParseTileKey(key)
+					if tx ~= nil then
+						self:SyncAquaVisual(tx, ty)
+					end
+				end
+			end
+		end
+	end
+end
+
+--------------------------------------------------------------------------
 -- 存档
 
 function TyPaddyManager:OnSave()
 	local data = { tiles = {} }
 	for key, info in pairs(self.tiles) do
-		data.tiles[key] = { water = info.water }
+		local tile = { water = info.water }
+		if info.aqua ~= nil then
+			tile.aqua = {
+				kind = info.aqua.kind,
+				count = info.aqua.count,
+				breed_t = info.aqua.breed_t,
+			}
+		end
+		data.tiles[key] = tile
 	end
 	return data
 end
@@ -486,7 +698,10 @@ function TyPaddyManager:OnLoad(data)
 	end
 	self.tiles = {}
 	for key, info in pairs(data.tiles) do
-		self.tiles[key] = { water = SnapDry(info.water) }
+		self.tiles[key] = {
+			water = SnapDry(info.water),
+			aqua = NormalizeAqua(info.aqua),
+		}
 	end
 end
 
@@ -513,8 +728,13 @@ function TyPaddyManager:LoadPostPass()
 					if TheWorld.Map:GetTile(tx, ty) ~= WORLD_TILES.TY_PADDY_DRY then
 						TheWorld.Map:SetTile(tx, ty, WORLD_TILES.TY_PADDY_DRY)
 					end
+					-- 干田上不应残留养殖；有存量则按干涸掉落结算
+					if info.aqua ~= nil then
+						self:HarvestAqua(tx, ty)
+					end
 				end
 				self:SyncVisual(tx, ty)
+				self:SyncAquaVisual(tx, ty)
 				if IsVisiblyWet(water) then
 					self:RefreshFloaters(tx, ty, true, true)
 				end

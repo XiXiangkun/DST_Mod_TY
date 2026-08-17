@@ -24,3 +24,11 @@ TUNING.TY_RICE_WINTER_SPEED = {
 	[4] = 0.8,
 	[5] = 1,
 }
+
+-- 水田养殖（一格一塘）
+-- 繁殖：湿田每 1 天 +1；鱼上限 4（约 4 天满）、虾上限 2（约 2 天满）
+TUNING.TY_AQUA_BREED_TIME = (TUNING.TOTAL_DAY_TIME or 480)
+TUNING.TY_AQUA_FISH_MAX = 4
+TUNING.TY_AQUA_SHRIMP_MAX = 2
+TUNING.TY_AQUA_FISH_DROP = "ty_grass_carp"
+TUNING.TY_AQUA_SHRIMP_DROP = "wobster_sheller_land"

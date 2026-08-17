@@ -3,6 +3,12 @@
 -- c_ty_paddy_set(0.6)    设置脚下整片水域水位 0~1
 -- c_ty_paddy_set(0)      整片干涸
 -- c_ty_paddy_info()      打印脚下水位/连通格数
+-- c_ty_fish_fx()         脚下生成游鱼特效（测试分层/动画）
+-- c_ty_shrimp_fx()       脚下生成游虾特效（测试分层/动画）
+-- c_ty_fish_seed()       给予鱼苗 x10
+-- c_ty_shrimp_seed()     给予虾苗 x10
+-- c_ty_grass_carp()      给予生草鱼 x1（可传数量）
+-- c_ty_grass_carp_cooked() 给予熟草鱼 x1（可传数量）
 -- c_ty_rice_seeds()      给予 5 期水稻种子各 10
 -- c_ty_rice_seeds(3)     只给三期种子 10
 -- c_ty_rice(5)           脚下生成对应期成熟水稻（可采）
@@ -46,6 +52,11 @@ function c_ty_paddy_info()
 	local tier = TheWorld.components.ty_paddy_manager:GetTier(tx, ty)
 	local body = TheWorld.components.ty_paddy_manager:CollectBodyKeys(tx, ty)
 	local body_n = body ~= nil and #body or 0
+	local aqua = TheWorld.components.ty_paddy_manager:GetAqua(tx, ty)
+	local aqua_str = "none"
+	if aqua ~= nil then
+		aqua_str = string.format("%s count=%d breed=%.1fs", tostring(aqua.kind), aqua.count or 0, aqua.breed_t or 0)
+	end
 	local tile = TheWorld.Map:GetTile(tx, ty)
 	local tile_name = tostring(tile)
 	if tile == WORLD_TILES.TY_PADDY then
@@ -54,14 +65,77 @@ function c_ty_paddy_info()
 		tile_name = "TY_PADDY_DRY"
 	end
 	print(string.format(
-		"[ty] tile=(%d,%d) map_tile=%s water=%s tier=%s body=%d raining=%s rate=%.2f",
+		"[ty] tile=(%d,%d) map_tile=%s water=%s tier=%s body=%d aqua=%s raining=%s rate=%.2f",
 		tx, ty, tile_name,
 		water ~= nil and string.format("%.1f%%", water * 100) or "n/a",
 		tostring(tier),
 		body_n,
+		aqua_str,
 		tostring(TheWorld.state.israining),
 		TheWorld.state.precipitationrate or 0
 	))
+end
+
+local function SpawnTyFxAtFeet(prefab)
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local cx, cy, cz = x, 0, z
+	if TheWorld ~= nil and TheWorld.Map ~= nil then
+		local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, y, z)
+		cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+	end
+	local fx = SpawnPrefab(prefab)
+	if fx == nil then
+		print("[ty] failed to spawn " .. prefab)
+		return
+	end
+	fx.Transform:SetPosition(cx, cy, cz)
+	print(string.format("[ty] spawned %s at (%.1f, %.1f, %.1f)", prefab, cx, cy, cz))
+end
+
+function c_ty_fish_fx()
+	SpawnTyFxAtFeet("ty_fish_fx")
+end
+
+function c_ty_shrimp_fx()
+	SpawnTyFxAtFeet("ty_shrimp_fx")
+end
+
+local function GiveTyItem(prefab, count)
+	local player = ConsoleCommandPlayer()
+	if player == nil or player.components.inventory == nil then
+		return
+	end
+	local item = SpawnPrefab(prefab)
+	if item == nil then
+		print("[ty] failed to spawn " .. prefab)
+		return
+	end
+	count = count or 10
+	if item.components.stackable ~= nil then
+		item.components.stackable:SetStackSize(count)
+	end
+	player.components.inventory:GiveItem(item)
+	print(string.format("[ty] gave %s x%d", prefab, count))
+end
+
+function c_ty_fish_seed(n)
+	GiveTyItem("ty_fish_seed", n or 10)
+end
+
+function c_ty_shrimp_seed(n)
+	GiveTyItem("ty_shrimp_seed", n or 10)
+end
+
+function c_ty_grass_carp(n)
+	GiveTyItem("ty_grass_carp", n or 1)
+end
+
+function c_ty_grass_carp_cooked(n)
+	GiveTyItem("ty_grass_carp_cooked", n or 1)
 end
 
 function c_ty_rice_seeds(stage)
