@@ -14,7 +14,7 @@ local function RandomizeAnimPhase(inst)
 	end
 end
 
-local function MakeAquaFx(name, bank, build, extra_assets)
+local function MakeAquaFx(name, bank, build, extra_assets, scale)
 	local assets =
 	{
 		Asset("ANIM", "anim/" .. bank .. ".zip"),
@@ -37,6 +37,9 @@ local function MakeAquaFx(name, bank, build, extra_assets)
 		inst.AnimState:PlayAnimation("idle", true)
 		inst.AnimState:SetLayer(LAYER_BACKGROUND)
 		inst.AnimState:SetSortOrder(SORT_ORDER)
+		if scale ~= nil then
+			inst.Transform:SetScale(scale, scale, scale)
+		end
 
 		inst:AddTag("FX")
 		inst:AddTag("NOCLICK")
@@ -63,4 +66,4 @@ end
 return MakeAquaFx("ty_fish_fx", "ty_fish_fx", "ty_fish_fx"),
 	MakeAquaFx("ty_shrimp_fx", "ty_shrimp_fx", "lobster_sheller", {
 		Asset("ANIM", "anim/lobster_sheller.zip"),
-	})
+	}, 0.7)

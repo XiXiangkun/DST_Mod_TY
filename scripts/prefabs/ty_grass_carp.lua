@@ -24,7 +24,7 @@ local function stopkicking(inst)
 	inst.AnimState:PlayAnimation("dead")
 end
 
-local function commonfn(anim, loop, dryable, cookable)
+local function commonfn(anim, loop, dryable, cookable, scale)
 	local inst = CreateEntity()
 	inst.entity:AddSoundEmitter()
 	inst.entity:AddTransform()
@@ -36,6 +36,7 @@ local function commonfn(anim, loop, dryable, cookable)
 	inst.AnimState:SetBank("ty_grass_carp")
 	inst.AnimState:SetBuild("ty_grass_carp")
 	inst.AnimState:PlayAnimation(anim, loop)
+	inst.Transform:SetScale(scale, scale, scale)
 
 	inst:AddTag("meat")
 	inst:AddTag("catfood")
@@ -117,7 +118,7 @@ local function flopsound(inst)
 end
 
 local function rawfn()
-	local inst = commonfn("idle", false, true, true)
+	local inst = commonfn("idle", false, true, true, 0.75)
 
 	if not TheWorld.ismastersim then
 		return inst
@@ -143,7 +144,7 @@ local function rawfn()
 end
 
 local function cookedfn()
-	local inst = commonfn("cooked", false, false, false)
+	local inst = commonfn("cooked", false, false, false, 0.65)
 
 	if not TheWorld.ismastersim then
 		return inst

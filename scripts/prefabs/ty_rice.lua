@@ -69,6 +69,9 @@ local function GetStageGrowTime(inst)
 	return base / speed
 end
 
+-- 水面涟漪符号：仅湿田显示
+local WATER_RIPPLE_SYMBOLS = { "ripple_front", "ripple_back" }
+
 local function IsOnWetPaddy(inst)
 	if TheWorld.components.ty_paddy_manager == nil then
 		return false
@@ -78,11 +81,36 @@ local function IsOnWetPaddy(inst)
 	return water ~= nil and water >= (TUNING.TY_PADDY_WET_THRESHOLD or 0.01)
 end
 
+local function ApplyWaterRippleSymbols(inst)
+	if inst.AnimState == nil or inst._paddy_wet == nil then
+		return
+	end
+	local wet = inst._paddy_wet:value()
+	for i = 1, #WATER_RIPPLE_SYMBOLS do
+		local symbol = WATER_RIPPLE_SYMBOLS[i]
+		if wet then
+			inst.AnimState:Show(symbol)
+		else
+			inst.AnimState:Hide(symbol)
+		end
+	end
+end
+
+local function SyncWaterRippleSymbols(inst, wet)
+	if inst._paddy_wet == nil then
+		return
+	end
+	inst._paddy_wet:set(wet == true)
+	ApplyWaterRippleSymbols(inst)
+end
+
 local function UpdateGrowthPause(inst)
+	local wet = IsOnWetPaddy(inst)
+	SyncWaterRippleSymbols(inst, wet)
 	if inst.components.growable == nil then
 		return
 	end
-	if IsOnWetPaddy(inst) then
+	if wet then
 		inst.components.growable:Resume("dry")
 	else
 		inst.components.growable:Pause("dry")
@@ -343,6 +371,11 @@ local function MakeRice(tier)
 
 		inst.rice_tier = tier
 
+		-- 默认湿田显示涟漪；主机在定位后再按水位同步
+		inst._paddy_wet = net_bool(inst.GUID, "ty_rice._paddy_wet", "paddywetdirty")
+		inst._paddy_wet:set(true)
+		inst:ListenForEvent("paddywetdirty", ApplyWaterRippleSymbols)
+
 		inst.entity:SetPristine()
 
 		if not TheWorld.ismastersim then
@@ -370,7 +403,12 @@ local function MakeRice(tier)
 		inst.components.growable.growoffscreen = true
 		inst.components.growable:SetStage(STAGE_SEED)
 		inst.components.growable:StartGrowing()
-		UpdateGrowthPause(inst)
+		-- 等种下/读档定位后再判干湿，避免生成在 (0,0,0) 时误藏涟漪
+		inst:DoTaskInTime(0, function(inst)
+			if inst:IsValid() then
+				UpdateGrowthPause(inst)
+			end
+		end)
 
 		MakeMediumBurnable(inst)
 		MakeSmallPropagator(inst)

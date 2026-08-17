@@ -64,7 +64,7 @@ local function MakeSeed(kind, anim, inv_image)
 
 		inst.AnimState:SetBank("ty_paddy_seed")
 		inst.AnimState:SetBuild("ty_paddy_seed")
-		inst.AnimState:PlayAnimation(anim)
+		inst.AnimState:PlayAnimation(anim, true)
 		inst.AnimState:SetRayTestOnBB(true)
 
 		inst.pickupsound = "vegetation_firm"
