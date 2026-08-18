@@ -1,3 +1,20 @@
+GLOBAL.SH_ITEMS_ATLAS = MODROOT.."images/inventoryimages/ty_items.xml"
+
 Assets = {
-	Asset("IMAGE", "levels/textures/noise_ty_paddy.tex"),
+	-- 道具物品
+	Asset("IMAGE", "images/inventoryimages/ty_items.tex"),
+	Asset("IMAGE", "images/inventoryimages/ty_items.xml"),
 }
+
+local ITEMS = {
+    "ty_grass_carp",
+    "ty_grass_carp_cooked",
+	"ty_fish_seed",
+	"ty_shrimp_seed",
+}
+
+-- 常规物品
+table.insert(Assets, Asset("ATLAS_BUILD", "images/inventoryimages/ty_items.xml", 256))
+for _, v in ipairs(ITEMS) do
+    RegisterInventoryItemAtlas("images/inventoryimages/ty_items.xml", v..".tex")
+end

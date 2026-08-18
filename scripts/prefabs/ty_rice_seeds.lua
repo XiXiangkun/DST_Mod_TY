@@ -2,7 +2,7 @@
 	水稻种子（5 期）
 	bank/build: ty_rice_seeds
 	anim: idle_1 ~ idle_5
-	可栽种到湿田 TY_PADDY；对应作物 ty_rice_1~5 稍后补充。
+	可栽种到任意湿田地皮；对应作物 ty_rice_1~5。
 ]]
 
 local assets =
@@ -10,10 +10,12 @@ local assets =
 	Asset("ANIM", "anim/ty_rice_seeds.zip"),
 }
 
+local PaddyTiles = require("ty_paddy_tiles")
+
 local PLANT_SPACING = 0.75
 
 local function CanPlantOnPaddy(inst, pt, mouseover, deployer)
-	if TheWorld.Map:GetTileAtPoint(pt.x, 0, pt.z) ~= WORLD_TILES.TY_PADDY then
+	if not PaddyTiles.IsWetPaddyAtPoint(pt.x, 0, pt.z) then
 		return false
 	end
 

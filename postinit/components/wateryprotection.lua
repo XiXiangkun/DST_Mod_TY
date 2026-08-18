@@ -3,16 +3,14 @@
 local TYENV = env
 GLOBAL.setfenv(1, GLOBAL)
 
-local function IsTyPaddyTile(tile)
-	return tile == WORLD_TILES.TY_PADDY or tile == WORLD_TILES.TY_PADDY_DRY
-end
+local PaddyTiles = require("ty_paddy_tiles")
 
 -- 原版 POINT 浇水只允许 FARMING_SOIL，这里补上水田
 TYENV.AddComponentAction("POINT", "wateryprotection", function(inst, doer, pos, actions, right, target)
 	if not right or pos == nil then
 		return
 	end
-	if IsTyPaddyTile(TheWorld.Map:GetTileAtPoint(pos:Get())) then
+	if PaddyTiles.IsPaddyTile(TheWorld.Map:GetTileAtPoint(pos:Get())) then
 		table.insert(actions, ACTIONS.POUR_WATER_GROUNDTILE)
 	end
 end)

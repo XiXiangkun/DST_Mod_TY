@@ -2,7 +2,10 @@
 	主机：水田水量（八向连通水域统一水位）、日耗、雨水补给、地皮湿/干与水面实体。
 	一格一塘养殖：鱼/虾苗、繁殖、游鱼/虾 FX、干涸掉落。
 	水分与繁殖按秒结算（OnUpdate + LongUpdate），跳时间会一起推进。
+	地皮：2 湿档 + 1 干，跨档才 SetTile。
 ]]
+
+local PaddyTiles = require("ty_paddy_tiles")
 
 local FLOATER_SCAN_RADIUS = (TILE_SCALE or 4) * 0.75
 local FLOATER_CANT_TAGS = { "INLIMBO", "player", "FX", "DECOR", "CLASSIFIED", "ty_paddy_water" }
@@ -304,7 +307,22 @@ function TyPaddyManager:RefreshFloaters(tx, ty, wet, silent)
 end
 
 function TyPaddyManager:IsPaddyTile(tile)
-	return tile == WORLD_TILES.TY_PADDY or tile == WORLD_TILES.TY_PADDY_DRY
+	return PaddyTiles.IsPaddyTile(tile)
+end
+
+function TyPaddyManager:IsWetPaddyTile(tile)
+	return PaddyTiles.IsWetPaddyTile(tile)
+end
+
+function TyPaddyManager:GetTileForWater(water)
+	return PaddyTiles.GetTileForWater(water)
+end
+
+function TyPaddyManager:ApplyGroundTile(tx, ty, water)
+	local want = PaddyTiles.GetTileForWater(water)
+	if TheWorld.Map:GetTile(tx, ty) ~= want then
+		TheWorld.Map:SetTile(tx, ty, want)
+	end
 end
 
 function TyPaddyManager:GetWater(tx, ty)
@@ -346,15 +364,7 @@ function TyPaddyManager:ApplyTileWaterState(tx, ty, water, prev_water)
 	local was_wet = IsVisiblyWet(prev_water)
 	local now_wet = IsVisiblyWet(water)
 
-	if now_wet then
-		if TheWorld.Map:GetTile(tx, ty) ~= WORLD_TILES.TY_PADDY then
-			TheWorld.Map:SetTile(tx, ty, WORLD_TILES.TY_PADDY)
-		end
-	else
-		if TheWorld.Map:GetTile(tx, ty) ~= WORLD_TILES.TY_PADDY_DRY then
-			TheWorld.Map:SetTile(tx, ty, WORLD_TILES.TY_PADDY_DRY)
-		end
-	end
+	self:ApplyGroundTile(tx, ty, water)
 
 	-- 干涸：先掉落鱼虾并清养殖，再刷水面
 	if was_wet and not now_wet then
@@ -456,7 +466,7 @@ function TyPaddyManager:Till(tx, ty)
 		self.tiles[key] = { water = 0 }
 	end
 
-	TheWorld.Map:SetTile(tx, ty, IsVisiblyWet(avg) and WORLD_TILES.TY_PADDY or WORLD_TILES.TY_PADDY_DRY)
+	self:ApplyGroundTile(tx, ty, avg)
 	self:SetBodyWater(body_keys, avg, true)
 
 	return true
@@ -720,18 +730,10 @@ function TyPaddyManager:LoadPostPass()
 			local tx, ty = ParseTileKey(key)
 			if tx ~= nil then
 				local water = info.water or 0
-				if IsVisiblyWet(water) then
-					if TheWorld.Map:GetTile(tx, ty) ~= WORLD_TILES.TY_PADDY then
-						TheWorld.Map:SetTile(tx, ty, WORLD_TILES.TY_PADDY)
-					end
-				else
-					if TheWorld.Map:GetTile(tx, ty) ~= WORLD_TILES.TY_PADDY_DRY then
-						TheWorld.Map:SetTile(tx, ty, WORLD_TILES.TY_PADDY_DRY)
-					end
+				self:ApplyGroundTile(tx, ty, water)
+				if not IsVisiblyWet(water) and info.aqua ~= nil then
 					-- 干田上不应残留养殖；有存量则按干涸掉落结算
-					if info.aqua ~= nil then
-						self:HarvestAqua(tx, ty)
-					end
+					self:HarvestAqua(tx, ty)
 				end
 				self:SyncVisual(tx, ty)
 				self:SyncAquaVisual(tx, ty)

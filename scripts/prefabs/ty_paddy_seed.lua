@@ -10,6 +10,8 @@ local assets =
 	Asset("ANIM", "anim/ty_paddy_seed.zip"),
 }
 
+local PaddyTiles = require("ty_paddy_tiles")
+
 local function GetAquaFailSpeech(kind)
 	if kind == "shrimp" then
 		return STRINGS.TY_ANNOUNCE_AQUA_HAS_SHRIMP
@@ -19,7 +21,7 @@ end
 
 -- 客户端无 ty_paddy_manager，只能用地皮判断（与水稻种子一致）
 local function CanDeployOnWetPaddy(inst, pt, mouseover, deployer)
-	return TheWorld.Map:GetTileAtPoint(pt.x, 0, pt.z) == WORLD_TILES.TY_PADDY
+	return PaddyTiles.IsWetPaddyAtPoint(pt.x, 0, pt.z)
 end
 
 local function OnDeploy(inst, pt, deployer)

@@ -6,11 +6,12 @@
 
 local Ripple = {}
 
+local PaddyTiles = require("ty_paddy_tiles")
+
 local TAG_SINKABLE = "ty_paddy_sinkable"
 
 local function IsWetPaddyAt(x, y, z)
-	return WORLD_TILES.TY_PADDY ~= nil
-		and TheWorld.Map:GetTileAtPoint(x, y, z) == WORLD_TILES.TY_PADDY
+	return PaddyTiles.IsWetPaddyAtPoint(x, y, z)
 end
 
 function Ripple.IsWetPaddyAt(x, y, z)

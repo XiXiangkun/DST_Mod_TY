@@ -13,6 +13,7 @@
 -- c_ty_rice_seeds(3)     只给三期种子 10
 -- c_ty_rice(5)           脚下生成对应期成熟水稻（可采）
 -- c_ty_rice(5, 1)        脚下生成对应期指定阶段 1~5
+-- c_ty_fisherman_house() 身前放置渔夫的家（白天会放出渔夫）
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -58,12 +59,8 @@ function c_ty_paddy_info()
 		aqua_str = string.format("%s count=%d breed=%.1fs", tostring(aqua.kind), aqua.count or 0, aqua.breed_t or 0)
 	end
 	local tile = TheWorld.Map:GetTile(tx, ty)
-	local tile_name = tostring(tile)
-	if tile == WORLD_TILES.TY_PADDY then
-		tile_name = "TY_PADDY"
-	elseif tile == WORLD_TILES.TY_PADDY_DRY then
-		tile_name = "TY_PADDY_DRY"
-	end
+	local PaddyTiles = require("ty_paddy_tiles")
+	local tile_name = PaddyTiles.GetTileName(tile)
 	print(string.format(
 		"[ty] tile=(%d,%d) map_tile=%s water=%s tier=%s body=%d aqua=%s raining=%s rate=%.2f",
 		tx, ty, tile_name,
@@ -209,4 +206,20 @@ function c_ty_rice(tier, stage)
 		wet = water ~= nil and water > 0,
 	})
 	print(string.format("[ty] spawned ty_rice_%d stage=%d", tier, stage))
+end
+
+function c_ty_fisherman_house()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local house = SpawnPrefab("ty_fisherman_house")
+	if house == nil then
+		print("[ty] failed to spawn ty_fisherman_house")
+		return
+	end
+	house.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned ty_fisherman_house")
 end

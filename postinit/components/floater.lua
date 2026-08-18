@@ -4,12 +4,11 @@
 local TYENV = env
 GLOBAL.setfenv(1, GLOBAL)
 
+local PaddyTiles = require("ty_paddy_tiles")
+
 local function IsOnWetPaddy(inst)
-	if WORLD_TILES.TY_PADDY == nil then
-		return false
-	end
 	local x, y, z = inst.Transform:GetWorldPosition()
-	return TheWorld.Map:GetTileAtPoint(x, y, z) == WORLD_TILES.TY_PADDY
+	return PaddyTiles.IsWetPaddyAtPoint(x, y, z)
 end
 
 TYENV.AddComponentPostInit("floater", function(self)

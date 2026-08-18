@@ -3,12 +3,12 @@ TUNING.TY_LANG = lang
 
 if lang == "en" then
 	STRINGS.NAMES.TY_PADDY_WATER = "Paddy Water"
-	STRINGS.NAMES.TY_RICE_SEEDS_1 = "Rice Seeds I"
+	STRINGS.NAMES.TY_RICE_SEEDS_1 = "Rice Seeds"
 	STRINGS.NAMES.TY_RICE_SEEDS_2 = "Rice Seeds II"
 	STRINGS.NAMES.TY_RICE_SEEDS_3 = "Rice Seeds III"
 	STRINGS.NAMES.TY_RICE_SEEDS_4 = "Rice Seeds IV"
 	STRINGS.NAMES.TY_RICE_SEEDS_5 = "Rice Seeds V"
-	STRINGS.NAMES.TY_RICE_1 = "Rice I"
+	STRINGS.NAMES.TY_RICE_1 = "Rice"
 	STRINGS.NAMES.TY_RICE_2 = "Rice II"
 	STRINGS.NAMES.TY_RICE_3 = "Rice III"
 	STRINGS.NAMES.TY_RICE_4 = "Rice IV"
@@ -24,7 +24,7 @@ if lang == "en" then
 	STRINGS.TY_ANNOUNCE_AQUA_HAS_SHRIMP = "This paddy already has shrimp fry."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISH_SEED = "Release into a wet paddy. They'll multiply over time."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_SHRIMP_SEED = "Release into a wet paddy. They'll multiply over time."
-	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "First-stage rice seeds. Plant on wet paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "Rice seeds. Plant on wet paddies."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_2 = "Second-stage rice seeds. Plant on wet paddies."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_3 = "Third-stage rice seeds. Plant on wet paddies."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_4 = "Fourth-stage rice seeds. Plant on wet paddies."
@@ -35,18 +35,39 @@ if lang == "en" then
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_4 = "Young rice of the fourth lineage."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_5 = "Hardy rice that regrows after harvest."
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_PANICLE = "A placeholder rice panicle."
+	STRINGS.NAMES.TY_FISHERMAN = "Fisherman"
+	STRINGS.NAMES.TY_FISHERMAN_HOUSE = "Fisherman's House"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN = "He knows every ripple in these paddies."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN_HOUSE = {
+		GENERIC = "A quiet house by the water.",
+		BURNT = "The fisherman's home is gone.",
+		FULL = "He's home for the night.",
+		LIGHTSOUT = "Someone's in there, keeping quiet.",
+	}
+	STRINGS.TY_FISHERMAN_TALK_LOOKATWILSON = {
+		"The catch looks fair today.",
+		"Paddy water raises the fattest fish.",
+		"Don't stir the mud too much.",
+		"A still pond keeps secrets.",
+		"Come back at dusk and I'll be gone.",
+	}
+	STRINGS.TY_FISHERMAN_TALK_GO_HOME = {
+		"Light's failing. Time to head in.",
+		"The fish can wait till morning.",
+		"Home before the dark takes the path.",
+	}
 else
 	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
-	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子·一"
-	STRINGS.NAMES.TY_RICE_SEEDS_2 = "水稻种子·二"
-	STRINGS.NAMES.TY_RICE_SEEDS_3 = "水稻种子·三"
-	STRINGS.NAMES.TY_RICE_SEEDS_4 = "水稻种子·四"
-	STRINGS.NAMES.TY_RICE_SEEDS_5 = "水稻种子·五"
-	STRINGS.NAMES.TY_RICE_1 = "水稻·一"
-	STRINGS.NAMES.TY_RICE_2 = "水稻·二"
-	STRINGS.NAMES.TY_RICE_3 = "水稻·三"
-	STRINGS.NAMES.TY_RICE_4 = "水稻·四"
-	STRINGS.NAMES.TY_RICE_5 = "水稻·五"
+	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子"
+	STRINGS.NAMES.TY_RICE_SEEDS_2 = "二期水稻种子"
+	STRINGS.NAMES.TY_RICE_SEEDS_3 = "三期水稻种子"
+	STRINGS.NAMES.TY_RICE_SEEDS_4 = "四期水稻种子"
+	STRINGS.NAMES.TY_RICE_SEEDS_5 = "五期水稻种子"
+	STRINGS.NAMES.TY_RICE_1 = "水稻"
+	STRINGS.NAMES.TY_RICE_2 = "二期水稻"
+	STRINGS.NAMES.TY_RICE_3 = "三期水稻"
+	STRINGS.NAMES.TY_RICE_4 = "四期水稻"
+	STRINGS.NAMES.TY_RICE_5 = "五期水稻"
 	STRINGS.NAMES.TY_RICE_PANICLE = "稻穗"
 	STRINGS.NAMES.TY_FISH_SEED = "鱼苗"
 	STRINGS.NAMES.TY_SHRIMP_SEED = "虾苗"
@@ -58,7 +79,7 @@ else
 	STRINGS.TY_ANNOUNCE_AQUA_HAS_SHRIMP = "这块水田已经有虾苗了。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISH_SEED = "放入湿田后会慢慢繁殖，干涸时会蹦出来。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_SHRIMP_SEED = "放入湿田后会慢慢繁殖，干涸时会蹦出来。"
-	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "一期水稻种子，可种在湿田上。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_1 = "水稻种子，可种在湿田上。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_2 = "二期水稻种子，可种在湿田上。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_3 = "三期水稻种子，可种在湿田上。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_SEEDS_4 = "四期水稻种子，可种在湿田上。"
@@ -69,4 +90,25 @@ else
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_4 = "四期水稻。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_5 = "五期水稻，收获后会重新生长。"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_RICE_PANICLE = "稻穗（占位）。"
+	STRINGS.NAMES.TY_FISHERMAN = "渔夫"
+	STRINGS.NAMES.TY_FISHERMAN_HOUSE = "渔夫的家"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN = "他熟悉这片水田的每一道涟漪。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN_HOUSE = {
+		GENERIC = "水边一间安静的小屋。",
+		BURNT = "渔夫的家没了。",
+		FULL = "他已经回家歇着了。",
+		LIGHTSOUT = "屋里有人，只是灯没亮。",
+	}
+	STRINGS.TY_FISHERMAN_TALK_LOOKATWILSON = {
+		"今天渔获还算过得去。",
+		"稻田边的水最肥。",
+		"别把泥搅得太浑。",
+		"静水才养得住鱼。",
+		"天黑我就回家了，你白天再来。",
+	}
+	STRINGS.TY_FISHERMAN_TALK_GO_HOME = {
+		"天色不早了，该回家了。",
+		"鱼明天再钓。",
+		"趁还能看清路，赶紧回去。",
+	}
 end
