@@ -6,6 +6,6 @@ PrefabFiles = {
 	"ty_rice_seeds",
 	"ty_rice_panicle",
 	"ty_rice",
-	"ty_fisherman",
-	"ty_fisherman_house",
+	"ty_npc",
+	"ty_npc_house",
 }

@@ -56,6 +56,27 @@ if lang == "en" then
 		"The fish can wait till morning.",
 		"Home before the dark takes the path.",
 	}
+	STRINGS.NAMES.TY_FARMWIFE = "Farmwife"
+	STRINGS.NAMES.TY_FARMHOUSE = "Farmhouse"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMWIFE = "She keeps the paddies in order."
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMHOUSE = {
+		GENERIC = "A modest house among the fields.",
+		BURNT = "The farmhouse is gone.",
+		FULL = "She's home for the night.",
+		LIGHTSOUT = "Someone's in there, keeping quiet.",
+	}
+	STRINGS.TY_FARMWIFE_TALK_LOOKATWILSON = {
+		"The rice needs watching today.",
+		"Don't trample the seedlings.",
+		"A wet paddy grows the best grain.",
+		"There's always more work in the fields.",
+		"Come back at dusk and I'll be gone.",
+	}
+	STRINGS.TY_FARMWIFE_TALK_GO_HOME = {
+		"Light's failing. Time to head in.",
+		"The fields can wait till morning.",
+		"Home before the dark takes the path.",
+	}
 else
 	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
 	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子"
@@ -109,6 +130,27 @@ else
 	STRINGS.TY_FISHERMAN_TALK_GO_HOME = {
 		"天色不早了，该回家了。",
 		"鱼明天再钓。",
+		"趁还能看清路，赶紧回去。",
+	}
+	STRINGS.NAMES.TY_FARMWIFE = "农妇"
+	STRINGS.NAMES.TY_FARMHOUSE = "农家"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMWIFE = "她把这片田地照料得井井有条。"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMHOUSE = {
+		GENERIC = "田边一间朴素的屋子。",
+		BURNT = "农家没了。",
+		FULL = "她已经回家歇着了。",
+		LIGHTSOUT = "屋里有人，只是灯没亮。",
+	}
+	STRINGS.TY_FARMWIFE_TALK_LOOKATWILSON = {
+		"今天得盯着稻子。",
+		"别踩着秧苗。",
+		"湿田才长得出好粮。",
+		"田里的活永远做不完。",
+		"天黑我就回家了，你白天再来。",
+	}
+	STRINGS.TY_FARMWIFE_TALK_GO_HOME = {
+		"天色不早了，该回家了。",
+		"田明天再种。",
 		"趁还能看清路，赶紧回去。",
 	}
 end
