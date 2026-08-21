@@ -77,6 +77,8 @@ if lang == "en" then
 		"The fields can wait till morning.",
 		"Home before the dark takes the path.",
 	}
+	STRINGS.NAMES.TY_TUGOU = "Yellow Dog"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_TUGOU = "A big farm dog. It keeps monsters away."
 else
 	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
 	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子"
@@ -153,4 +155,6 @@ else
 		"田明天再种。",
 		"趁还能看清路，赶紧回去。",
 	}
+	STRINGS.NAMES.TY_TUGOU = "大黄狗"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_TUGOU = "田边看家的大黄狗，专咬不友好的怪物。"
 end

@@ -15,6 +15,7 @@
 -- c_ty_rice(5, 1)        脚下生成对应期指定阶段 1~5
 -- c_ty_fisherman_house() 身前放置渔夫的家（白天会放出渔夫）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
+-- c_ty_tugou()           身前生成大黄狗
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -239,4 +240,20 @@ function c_ty_farmhouse()
 	end
 	house.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
 	print("[ty] spawned ty_farmhouse")
+end
+
+function c_ty_tugou()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local dog = SpawnPrefab("ty_tugou")
+	if dog == nil then
+		print("[ty] failed to spawn ty_tugou")
+		return
+	end
+	dog.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned ty_tugou")
 end

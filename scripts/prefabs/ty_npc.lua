@@ -41,6 +41,22 @@ local function MakeNPC(def)
 
 		inst.entity:SetPristine()
 
+		-- 雨天显示层（如斗笠/雨披）：客户端也要跟世界天气同步
+		if def.rain_show ~= nil then
+			local symbols = def.rain_show
+			local function SyncRainLayers(inst, israining)
+				for i = 1, #symbols do
+					if israining then
+						inst.AnimState:Show(symbols[i])
+					else
+						inst.AnimState:Hide(symbols[i])
+					end
+				end
+			end
+			SyncRainLayers(inst, TheWorld.state.israining)
+			inst:WatchWorldState("israining", SyncRainLayers)
+		end
+
 		if not TheWorld.ismastersim then
 			return inst
 		end
@@ -69,10 +85,10 @@ end
 return MakeNPC({
 	name = "ty_fisherman",
 	tag = "ty_fisherman",
-	-- 动画暂用官方 pigman。ty_npc_farmer_1.zip 进档会原生崩溃，修好后再换回。
-	bank = "pigman",
-	build = "pig_build",
-	hide = { "hat", "ARM_carry", "ARM_carry_up" },
+	bank = "ty_npc_farmer_1",
+	build = "ty_npc_farmer_1",
+	hide = { "swap_hat", "swap_object", "arm_carry", "torso_overlay", "headtopper" },
+	rain_show = { "torso_overlay", "headtopper" },
 	assets = {
 		Asset("ANIM", "anim/ty_npc_farmer_1_build.zip"),
 		Asset("ANIM", "anim/ty_npc_farmer_1_bank.zip"),
