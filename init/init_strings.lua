@@ -56,6 +56,19 @@ if lang == "en" then
 		"The fish can wait till morning.",
 		"Home before the dark takes the path.",
 	}
+	STRINGS.NAMES.TY_FISHERMAN_SHOP = "Fish Stall"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN_SHOP = {
+		GENERIC = "A little stall for today's catch.",
+		CLOSED = "Not open for business yet.",
+		OPEN = "Fresh from the paddies.",
+		SOLDOUT = "Everything's gone for today.",
+	}
+	STRINGS.ACTIONS.TY_OPEN_FISH_SHOP = "Browse"
+	STRINGS.TY_FISHERMAN_SHOP_BUSY = "Someone's already buying."
+	STRINGS.TY_FISHERMAN_SHOP_TITLE = "Fish Stall"
+	STRINGS.TY_FISHERMAN_SHOP_BUY = "Buy"
+	STRINGS.TY_FISHERMAN_SHOP_STOCK = "Stock: %d"
+	STRINGS.TY_FISHERMAN_SHOP_PRICE = "%d"
 	STRINGS.NAMES.TY_FARMWIFE = "Farmwife"
 	STRINGS.NAMES.TY_FARMHOUSE = "Farmhouse"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMWIFE = "She keeps the paddies in order."
@@ -134,6 +147,19 @@ else
 		"鱼明天再钓。",
 		"趁还能看清路，赶紧回去。",
 	}
+	STRINGS.NAMES.TY_FISHERMAN_SHOP = "渔夫小摊"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FISHERMAN_SHOP = {
+		GENERIC = "卖当日渔获的小铺面。",
+		CLOSED = "还未开张。",
+		OPEN = "水田里刚捞上来的鲜货。",
+		SOLDOUT = "今天的货卖光了。",
+	}
+	STRINGS.ACTIONS.TY_OPEN_FISH_SHOP = "选购"
+	STRINGS.TY_FISHERMAN_SHOP_BUSY = "有人在买。"
+	STRINGS.TY_FISHERMAN_SHOP_TITLE = "渔夫小摊"
+	STRINGS.TY_FISHERMAN_SHOP_BUY = "购买"
+	STRINGS.TY_FISHERMAN_SHOP_STOCK = "库存：%d"
+	STRINGS.TY_FISHERMAN_SHOP_PRICE = "%d"
 	STRINGS.NAMES.TY_FARMWIFE = "农妇"
 	STRINGS.NAMES.TY_FARMHOUSE = "农家"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FARMWIFE = "她把这片田地照料得井井有条。"

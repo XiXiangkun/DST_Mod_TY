@@ -8,5 +8,6 @@ PrefabFiles = {
 	"ty_rice",
 	"ty_npc",
 	"ty_npc_house",
+	"ty_fisherman_shop",
 	"ty_tugou",
 }

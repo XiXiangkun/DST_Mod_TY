@@ -27,7 +27,36 @@ local states =
 			else
 				inst.AnimState:PlayAnimation("idle_loop", true)
 			end
+
+			if inst._tending_shop then
+				inst.sg:SetTimeout(4 + math.random() * 5)
+			end
 		end,
+
+		ontimeout = function(inst)
+			if inst._tending_shop and not inst.sg:HasStateTag("busy") then
+				inst.sg:GoToState("emote_hat")
+			else
+				inst.sg:GoToState("idle")
+			end
+		end,
+	},
+
+	State{
+		name = "emote_hat",
+		tags = { "idle", "canrotate" },
+
+		onenter = function(inst)
+			inst.components.locomotor:StopMoving()
+			inst.AnimState:PlayAnimation("emote_hat")
+		end,
+
+		events =
+		{
+			EventHandler("animover", function(inst)
+				inst.sg:GoToState("idle")
+			end),
+		},
 	},
 }
 

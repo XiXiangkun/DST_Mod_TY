@@ -56,6 +56,26 @@ local function onoccupied(inst, child)
 		inst.doortask:Cancel()
 	end
 	inst.doortask = inst:DoTaskInTime(1, onoccupieddoortask)
+
+	if child ~= nil then
+		child._tending_shop = false
+		if child._shop ~= nil and child._shop:IsValid()
+			and child._shop.components.ty_fisherman_shop ~= nil then
+			child._shop.components.ty_fisherman_shop:SetTending(false)
+		end
+	end
+end
+
+local function BindFishermanShop(house, child)
+	if house == nil or child == nil or not child:HasTag("ty_fisherman") then
+		return
+	end
+	local util = require("ty_fisherman_shop_util")
+	local shop = util.EnsureShopForHouse(house)
+	if shop ~= nil then
+		child._shop = shop
+		shop._ty_fisherman = child
+	end
 end
 
 local function onvacate(inst, child)
@@ -66,6 +86,23 @@ local function onvacate(inst, child)
 	inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
 	inst.SoundEmitter:KillSound("pigsound")
 	LightsOff(inst)
+	BindFishermanShop(inst, child)
+end
+
+local function HouseOnSave(inst, data)
+	if inst._ty_shop ~= nil and inst._ty_shop:IsValid() then
+		data.shop = inst._ty_shop.GUID
+	end
+end
+
+local function HouseOnLoadPostPass(inst, newents, data)
+	if data ~= nil and data.shop ~= nil and newents[data.shop] ~= nil then
+		local util = require("ty_fisherman_shop_util")
+		util.LinkHouseAndShop(inst, newents[data.shop].entity)
+	elseif inst._spawn_shop then
+		local util = require("ty_fisherman_shop_util")
+		util.EnsureShopForHouse(inst)
+	end
 end
 
 local function onhammered(inst, worker)
@@ -78,6 +115,11 @@ local function onhammered(inst, worker)
 	inst:RemoveComponent("spawner")
 	if child ~= nil then
 		child:Remove()
+	end
+
+	if inst._ty_shop ~= nil and inst._ty_shop:IsValid() then
+		inst._ty_shop:Remove()
+		inst._ty_shop = nil
 	end
 
 	inst.components.lootdropper:DropLoot()
@@ -137,6 +179,15 @@ local function oninit(inst)
 			inst.components.spawner:GoHome(child)
 		end
 	end
+	if inst._spawn_shop then
+		inst:DoTaskInTime(0, function()
+			if not inst:IsValid() then
+				return
+			end
+			local util = require("ty_fisherman_shop_util")
+			util.EnsureShopForHouse(inst)
+		end)
+	end
 end
 
 local function MakeHouse(def)
@@ -145,6 +196,9 @@ local function MakeHouse(def)
 		def.child,
 		"collapse_big",
 	}
+	if def.spawn_shop then
+		table.insert(prefabs, "ty_fisherman_shop")
+	end
 
 	local function fn()
 		local inst = CreateEntity()
@@ -182,6 +236,7 @@ local function MakeHouse(def)
 		end
 
 		inst.lightson = false
+		inst._spawn_shop = def.spawn_shop and true or false
 
 		inst:AddComponent("lootdropper")
 		inst.components.lootdropper:SetLoot({ "boards", "boards", "cutstone" })
@@ -209,6 +264,11 @@ local function MakeHouse(def)
 
 		MakeSnowCovered(inst)
 
+		if inst._spawn_shop then
+			inst.OnSave = HouseOnSave
+			inst.OnLoadPostPass = HouseOnLoadPostPass
+		end
+
 		inst.inittask = inst:DoTaskInTime(0, oninit)
 
 		return inst
@@ -225,6 +285,7 @@ return MakeHouse({
 	build = "pig_house",
 	minimap = "pighouse.png",
 	respawn = TUNING.TY_FISHERMAN_HOUSE_RESPAWN,
+	spawn_shop = true,
 }),
 MakeHouse({
 	name = "ty_farmhouse",

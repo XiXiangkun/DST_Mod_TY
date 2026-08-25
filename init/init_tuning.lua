@@ -43,6 +43,38 @@ TUNING.TY_FISHERMAN_FACE_DIST = 4
 TUNING.TY_FISHERMAN_KEEP_FACE_DIST = 8
 TUNING.TY_FISHERMAN_HOUSE_RESPAWN = (TUNING.TOTAL_DAY_TIME or 480) * 4
 
+-- 渔夫铺面
+TUNING.TY_FISHERMAN_SHOP_DIST = 8
+TUNING.TY_FISHERMAN_SHOP_DIST_FALLBACKS = { 8, 6, 4, 2 }
+TUNING.TY_FISHERMAN_SHOP_LOCK_TIME = 45
+TUNING.TY_FISHERMAN_SHOP_STALL_DIST = 1.4
+TUNING.TY_FISHERMAN_SHOP_ARRIVE_DIST = 2.2
+TUNING.TY_FISHERMAN_SHOP_INTERACT_DIST = 3.5
+TUNING.TY_FISHERMAN_SHOP_CURRENCY = "goldnugget"
+TUNING.TY_FISHERMAN_SHOP_COMMON_SLOTS = 10
+TUNING.TY_FISHERMAN_SHOP_RARE_SLOTS = 2
+TUNING.TY_FISHERMAN_SHOP_COLS = 4
+TUNING.TY_FISHERMAN_SHOP_ROWS = 3
+-- 普通池 / 稀有池：price=金块单价，stock=出现时库存
+TUNING.TY_FISHERMAN_SHOP_COMMON = {
+	{ prefab = "pondfish", price = 1, stock = 3 },
+	{ prefab = "pondfish_cooked", price = 1, stock = 2 },
+	{ prefab = "fish", price = 1, stock = 3 },
+	{ prefab = "fish_cooked", price = 1, stock = 2 },
+	{ prefab = "fishmeat_small", price = 1, stock = 3 },
+	{ prefab = "fishmeat_small_cooked", price = 1, stock = 2 },
+	{ prefab = "fishmeat_small_dried", price = 2, stock = 2 },
+	{ prefab = "fishmeat", price = 2, stock = 2 },
+	{ prefab = "fishmeat_cooked", price = 2, stock = 2 },
+	{ prefab = "fishmeat_dried", price = 3, stock = 1 },
+	{ prefab = "eel", price = 2, stock = 2 },
+	{ prefab = "eel_cooked", price = 2, stock = 1 },
+}
+TUNING.TY_FISHERMAN_SHOP_RARE = {
+	{ prefab = "ty_fish_seed", price = 5, stock = 1 },
+	{ prefab = "ty_shrimp_seed", price = 5, stock = 1 },
+}
+
 -- 农妇 / 农家
 TUNING.TY_FARMWIFE_WALK_SPEED = 3
 TUNING.TY_FARMWIFE_RUN_SPEED = 5

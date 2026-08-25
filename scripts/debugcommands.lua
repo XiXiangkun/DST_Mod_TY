@@ -13,7 +13,8 @@
 -- c_ty_rice_seeds(3)     只给三期种子 10
 -- c_ty_rice(5)           脚下生成对应期成熟水稻（可采）
 -- c_ty_rice(5, 1)        脚下生成对应期指定阶段 1~5
--- c_ty_fisherman_house() 身前放置渔夫的家（白天会放出渔夫）
+-- c_ty_fisherman_house() 身前放置渔夫的家（白天放出渔夫，附近绑定生成铺面）
+-- c_ty_fisherman_shop()  身前强制生成已开张铺面（调试 UI / 库存）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
 
@@ -223,7 +224,28 @@ function c_ty_fisherman_house()
 		return
 	end
 	house.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
-	print("[ty] spawned ty_fisherman_house")
+	-- 铺面由房屋 oninit / spawn_shop 绑定生成
+	print("[ty] spawned ty_fisherman_house (+shop)")
+end
+
+function c_ty_fisherman_shop()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local shop = SpawnPrefab("ty_fisherman_shop")
+	if shop == nil then
+		print("[ty] failed to spawn ty_fisherman_shop")
+		return
+	end
+	shop.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	if shop.components.ty_fisherman_shop ~= nil then
+		shop.components.ty_fisherman_shop:RerollStock()
+		shop.components.ty_fisherman_shop:SetTending(true)
+	end
+	print("[ty] spawned ty_fisherman_shop (forced open)")
 end
 
 function c_ty_farmhouse()
