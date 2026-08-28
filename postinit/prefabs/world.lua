@@ -6,6 +6,7 @@ local Ripple = require("ty_paddy_ripple")
 local function AddPaddyManager(inst)
 	if inst.ismastersim then
 		inst:AddComponent("ty_paddy_manager")
+		inst:AddComponent("ty_fisherman_manager")
 	end
 end
 

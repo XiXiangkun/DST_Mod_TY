@@ -1,7 +1,6 @@
 --[[
 	NPC 房屋（日出放出、夜晚收回）
-	共用官方 pighouse 逻辑；各房屋用 MakeHouse 配置 child、bank/build。
-	后期换独立动画时，改对应条目的 bank/build/assets 即可。
+	渔夫小屋：可建造、世界唯一、向世界组件注册；不再自动生成铺面。
 ]]
 
 local function LightsOn(inst)
@@ -48,6 +47,18 @@ local function onoccupieddoortask(inst)
 	end
 end
 
+local function StopChildTending(child)
+	if child == nil then
+		return
+	end
+	child._tending_shop = false
+	local shop = child._shop
+	if shop ~= nil and shop:IsValid() and shop.components.ty_fisherman_shop ~= nil then
+		shop.components.ty_fisherman_shop:SetTending(false)
+	end
+	child._shop = nil
+end
+
 local function onoccupied(inst, child)
 	inst.SoundEmitter:PlaySound("dontstarve/pig/pig_in_hut", "pigsound")
 	inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
@@ -56,26 +67,7 @@ local function onoccupied(inst, child)
 		inst.doortask:Cancel()
 	end
 	inst.doortask = inst:DoTaskInTime(1, onoccupieddoortask)
-
-	if child ~= nil then
-		child._tending_shop = false
-		if child._shop ~= nil and child._shop:IsValid()
-			and child._shop.components.ty_fisherman_shop ~= nil then
-			child._shop.components.ty_fisherman_shop:SetTending(false)
-		end
-	end
-end
-
-local function BindFishermanShop(house, child)
-	if house == nil or child == nil or not child:HasTag("ty_fisherman") then
-		return
-	end
-	local util = require("ty_fisherman_shop_util")
-	local shop = util.EnsureShopForHouse(house)
-	if shop ~= nil then
-		child._shop = shop
-		shop._ty_fisherman = child
-	end
+	StopChildTending(child)
 end
 
 local function onvacate(inst, child)
@@ -86,22 +78,8 @@ local function onvacate(inst, child)
 	inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
 	inst.SoundEmitter:KillSound("pigsound")
 	LightsOff(inst)
-	BindFishermanShop(inst, child)
-end
-
-local function HouseOnSave(inst, data)
-	if inst._ty_shop ~= nil and inst._ty_shop:IsValid() then
-		data.shop = inst._ty_shop.GUID
-	end
-end
-
-local function HouseOnLoadPostPass(inst, newents, data)
-	if data ~= nil and data.shop ~= nil and newents[data.shop] ~= nil then
-		local util = require("ty_fisherman_shop_util")
-		util.LinkHouseAndShop(inst, newents[data.shop].entity)
-	elseif inst._spawn_shop then
-		local util = require("ty_fisherman_shop_util")
-		util.EnsureShopForHouse(inst)
+	if child ~= nil and child:HasTag("ty_fisherman") then
+		TheWorld:PushEvent("ty_register_fisherman", child)
 	end
 end
 
@@ -114,12 +92,8 @@ local function onhammered(inst, worker)
 	local child = inst.components.spawner ~= nil and inst.components.spawner.child or nil
 	inst:RemoveComponent("spawner")
 	if child ~= nil then
+		StopChildTending(child)
 		child:Remove()
-	end
-
-	if inst._ty_shop ~= nil and inst._ty_shop:IsValid() then
-		inst._ty_shop:Remove()
-		inst._ty_shop = nil
 	end
 
 	inst.components.lootdropper:DropLoot()
@@ -179,15 +153,23 @@ local function oninit(inst)
 			inst.components.spawner:GoHome(child)
 		end
 	end
-	if inst._spawn_shop then
-		inst:DoTaskInTime(0, function()
-			if not inst:IsValid() then
-				return
-			end
-			local util = require("ty_fisherman_shop_util")
-			util.EnsureShopForHouse(inst)
-		end)
+end
+
+local function RegisterHouse(inst)
+	TheWorld:PushEvent("ty_register_fisherman_house", inst)
+end
+
+local function onbuilt_fisherman_house(inst)
+	local mgr = TheWorld.components.ty_fisherman_manager
+	if mgr == nil or not mgr:RegisterHouse(inst) then
+		-- 竞态：已有小屋则拆掉新建并退材料
+		if inst.components.lootdropper ~= nil then
+			inst.components.lootdropper:DropLoot()
+		end
+		inst:Remove()
+		return
 	end
+	inst.SoundEmitter:PlaySound("dontstarve/common/place_structure_wood")
 end
 
 local function MakeHouse(def)
@@ -196,9 +178,6 @@ local function MakeHouse(def)
 		def.child,
 		"collapse_big",
 	}
-	if def.spawn_shop then
-		table.insert(prefabs, "ty_fisherman_shop")
-	end
 
 	local function fn()
 		local inst = CreateEntity()
@@ -236,7 +215,6 @@ local function MakeHouse(def)
 		end
 
 		inst.lightson = false
-		inst._spawn_shop = def.spawn_shop and true or false
 
 		inst:AddComponent("lootdropper")
 		inst.components.lootdropper:SetLoot({ "boards", "boards", "cutstone" })
@@ -264,9 +242,10 @@ local function MakeHouse(def)
 
 		MakeSnowCovered(inst)
 
-		if inst._spawn_shop then
-			inst.OnSave = HouseOnSave
-			inst.OnLoadPostPass = HouseOnLoadPostPass
+		if def.register_world then
+			inst:ListenForEvent("onbuilt", onbuilt_fisherman_house)
+			-- 读档 / 调试生成：延迟注册
+			inst:DoTaskInTime(0, RegisterHouse)
 		end
 
 		inst.inittask = inst:DoTaskInTime(0, oninit)
@@ -274,10 +253,14 @@ local function MakeHouse(def)
 		return inst
 	end
 
-	return Prefab(def.name, fn, assets, prefabs)
+	local ret = { Prefab(def.name, fn, assets, prefabs) }
+	if def.placer then
+		table.insert(ret, MakePlacer(def.placer, def.bank, def.build, "idle"))
+	end
+	return ret
 end
 
-return MakeHouse({
+local fisherman_house = MakeHouse({
 	name = "ty_fisherman_house",
 	child = "ty_fisherman",
 	tag = "ty_fisherman_house",
@@ -285,9 +268,11 @@ return MakeHouse({
 	build = "pig_house",
 	minimap = "pighouse.png",
 	respawn = TUNING.TY_FISHERMAN_HOUSE_RESPAWN,
-	spawn_shop = true,
-}),
-MakeHouse({
+	register_world = true,
+	placer = "ty_fisherman_house_placer",
+})
+
+local farmhouse = MakeHouse({
 	name = "ty_farmhouse",
 	child = "ty_farmwife",
 	tag = "ty_farmhouse",
@@ -296,3 +281,12 @@ MakeHouse({
 	minimap = "pighouse.png",
 	respawn = TUNING.TY_FARMHOUSE_RESPAWN,
 })
+
+local prefabs = {}
+for _, v in ipairs(fisherman_house) do
+	table.insert(prefabs, v)
+end
+for _, v in ipairs(farmhouse) do
+	table.insert(prefabs, v)
+end
+return unpack(prefabs)

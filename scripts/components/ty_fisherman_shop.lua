@@ -71,6 +71,7 @@ local TyFishermanShop = Class(function(self, inst)
 	self.inst = inst
 	self.slots = {}
 	self.tending = false
+	self.licensed = false
 	self.lock_userid = nil
 	self.lock_task = nil
 	self._catalog = CatalogLookup()
@@ -79,6 +80,9 @@ local TyFishermanShop = Class(function(self, inst)
 		if not TheWorld.ismastersim then
 			self.slots = DecodeSlots(inst._stock_str:value())
 			self.tending = inst._tending:value()
+			if inst._licensed ~= nil then
+				self.licensed = inst._licensed:value()
+			end
 			inst:PushEvent("ty_shop_ui_dirty")
 		end
 	end)
@@ -86,6 +90,7 @@ local TyFishermanShop = Class(function(self, inst)
 	if not TheWorld.ismastersim and inst._stock_str ~= nil then
 		self.slots = DecodeSlots(inst._stock_str:value())
 		self.tending = inst._tending ~= nil and inst._tending:value() or false
+		self.licensed = inst._licensed ~= nil and inst._licensed:value() or false
 	end
 end)
 
@@ -104,7 +109,35 @@ function TyFishermanShop:Sync()
 	if self.inst._tending ~= nil then
 		self.inst._tending:set(self.tending)
 	end
+	if self.inst._licensed ~= nil then
+		self.inst._licensed:set(self.licensed)
+	end
 	self.inst:PushEvent("ty_shop_ui_dirty")
+end
+
+function TyFishermanShop:IsLicensed()
+	if not TheWorld.ismastersim and self.inst._licensed ~= nil then
+		return self.inst._licensed:value()
+	end
+	return self.licensed
+end
+
+function TyFishermanShop:SetLicensed(licensed)
+	licensed = licensed and true or false
+	if self.licensed == licensed then
+		return
+	end
+	self.licensed = licensed
+	self.inst:AddOrRemoveTag("ty_shop_licensed", licensed)
+	if licensed then
+		if TheWorld.state.isday then
+			self:RerollStock()
+		end
+	else
+		self:SetTending(false)
+		self:ClearStock()
+	end
+	self:Sync()
 end
 
 function TyFishermanShop:GetSlots()
@@ -139,6 +172,9 @@ function TyFishermanShop:ClearStock()
 end
 
 function TyFishermanShop:RerollStock()
+	if not self:IsLicensed() then
+		return
+	end
 	local slots = {}
 	local common = ShuffleCopy(TUNING.TY_FISHERMAN_SHOP_COMMON or {})
 	local rare = ShuffleCopy(TUNING.TY_FISHERMAN_SHOP_RARE or {})
@@ -165,6 +201,9 @@ end
 
 function TyFishermanShop:SetTending(tending)
 	tending = tending and true or false
+	if tending and not self:IsLicensed() then
+		tending = false
+	end
 	if self.tending == tending then
 		return
 	end
@@ -221,7 +260,7 @@ function TyFishermanShop:TryAcquireLock(doer)
 	if doer == nil or doer.userid == nil then
 		return false, "busy"
 	end
-	if not self:IsTending() then
+	if not self:IsLicensed() or not self:IsTending() then
 		return false, "closed"
 	end
 	if self.lock_userid ~= nil and self.lock_userid ~= doer.userid then
@@ -252,7 +291,7 @@ function TyFishermanShop:TryOpen(doer)
 	if doer == nil then
 		return false
 	end
-	if not self:IsTending() then
+	if not self:IsLicensed() or not self:IsTending() then
 		return false
 	end
 
@@ -301,7 +340,7 @@ function TyFishermanShop:TryBuy(doer, slot_index)
 	if slot_index < 1 or slot_index > 12 then
 		return false
 	end
-	if not self:IsTending() then
+	if not self:IsLicensed() or not self:IsTending() then
 		return false
 	end
 	if not self:IsLockedBy(doer.userid) then
@@ -344,7 +383,7 @@ function TyFishermanShop:TryBuy(doer, slot_index)
 end
 
 function TyFishermanShop:OnSave()
-	local data = { tending = self.tending, slots = {} }
+	local data = { tending = false, licensed = self.licensed, slots = {} }
 	for i = 1, 12 do
 		local s = self.slots[i]
 		if s ~= nil then
@@ -371,12 +410,26 @@ function TyFishermanShop:OnLoad(data)
 			end
 		end
 	end
-	-- 到摊前不可买；读档后由渔夫重新站岗再开
 	self.tending = false
+	if data.licensed then
+		self.licensed = true
+		self.inst:AddTag("ty_shop_licensed")
+		self.inst:DoTaskInTime(0, function()
+			if self.inst:IsValid() and self.licensed then
+				TheWorld:PushEvent("ty_register_licensed_shop", self.inst)
+				self:Sync()
+			end
+		end)
+	else
+		self.licensed = false
+	end
 	self:Sync()
 end
 
 function TyFishermanShop:GetStatus()
+	if not self:IsLicensed() then
+		return "UNLICENSED"
+	end
 	if not self:IsTending() then
 		return "CLOSED"
 	end

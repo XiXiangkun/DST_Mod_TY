@@ -30,24 +30,32 @@ local function GoHomeAction(inst)
 	end
 end
 
-local function EnsureShop(inst)
-	if inst._shop ~= nil and inst._shop:IsValid() then
-		return inst._shop
+local function GetManager()
+	return TheWorld.components.ty_fisherman_manager
+end
+
+local function GetLicensedShop(inst)
+	local mgr = GetManager()
+	if mgr == nil then
+		return nil
 	end
-	local home = inst.components.homeseeker ~= nil and inst.components.homeseeker.home or nil
-	if home ~= nil and home:IsValid() then
-		local util = require("ty_fisherman_shop_util")
-		local shop = util.EnsureShopForHouse(home)
-		if shop ~= nil then
-			inst._shop = shop
-			shop._ty_fisherman = inst
-		end
+	local shop = mgr:GetLicensedShop()
+	if shop == nil or not shop:IsValid() then
+		return nil
 	end
-	return inst._shop
+	if not mgr:IsShopReachable(shop) then
+		return nil
+	end
+	inst._shop = shop
+	return shop
+end
+
+local function HasReachableShop(inst)
+	return GetLicensedShop(inst) ~= nil
 end
 
 local function GetShopStallPos(inst)
-	local shop = EnsureShop(inst)
+	local shop = GetLicensedShop(inst)
 	if shop == nil then
 		return nil
 	end
@@ -57,12 +65,8 @@ local function GetShopStallPos(inst)
 	return shop:GetPosition()
 end
 
-local function HasShop(inst)
-	return EnsureShop(inst) ~= nil
-end
-
 local function IsNearStall(inst)
-	local shop = EnsureShop(inst)
+	local shop = GetLicensedShop(inst)
 	if shop == nil then
 		return false
 	end
@@ -78,9 +82,16 @@ end
 local function SetTending(inst, tending)
 	tending = tending and true or false
 	inst._tending_shop = tending
-	local shop = EnsureShop(inst)
+	local shop = GetLicensedShop(inst)
 	if shop ~= nil and shop.components.ty_fisherman_shop ~= nil then
 		shop.components.ty_fisherman_shop:SetTending(tending)
+	elseif not tending then
+		-- 无可达摊时确保关掉旧摊
+		local mgr = GetManager()
+		local licensed = mgr ~= nil and mgr:GetLicensedShop() or nil
+		if licensed ~= nil and licensed.components.ty_fisherman_shop ~= nil then
+			licensed.components.ty_fisherman_shop:SetTending(false)
+		end
 	end
 end
 
@@ -119,8 +130,7 @@ end)
 function FishermanBrain:OnStart()
 	local day = WhileNode(function() return TheWorld.state.isday end, "IsDay",
 		PriorityNode({
-			-- 有铺：去摊 / 守摊
-			WhileNode(function() return HasShop(self.inst) end, "HasShop",
+			WhileNode(function() return HasReachableShop(self.inst) end, "HasLicensedShop",
 				PriorityNode({
 					WhileNode(function() return KeepTending(self.inst) end, "TendShop",
 						PriorityNode({
@@ -130,7 +140,6 @@ function FishermanBrain:OnStart()
 						}, .5)),
 					Leash(self.inst, GetShopStallPos, ARRIVE_DIST, 0.5),
 				}, .5)),
-			-- 无铺兜底：旧行为
 			Leash(self.inst, GetHomePos, LEASH_MAX_DIST, LEASH_RETURN_DIST),
 			ChattyNode(self.inst, "TY_FISHERMAN_TALK_LOOKATWILSON",
 				FaceEntity(self.inst, GetFaceTargetFn, KeepFaceTargetFn), 6, 6),

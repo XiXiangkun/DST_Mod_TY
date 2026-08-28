@@ -13,8 +13,9 @@
 -- c_ty_rice_seeds(3)     只给三期种子 10
 -- c_ty_rice(5)           脚下生成对应期成熟水稻（可采）
 -- c_ty_rice(5, 1)        脚下生成对应期指定阶段 1~5
--- c_ty_fisherman_house() 身前放置渔夫的家（白天放出渔夫，附近绑定生成铺面）
--- c_ty_fisherman_shop()  身前强制生成已开张铺面（调试 UI / 库存）
+-- c_ty_fisherman_house() 身前放置渔夫小屋（世界唯一，会向世界组件注册）
+-- c_ty_fisherman_shop()  身前放置铺面（未挂牌）
+-- c_ty_license_shop()    给附近最近铺面强制挂牌（调试，不耗电子元件）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
 
@@ -216,6 +217,11 @@ function c_ty_fisherman_house()
 	if player == nil then
 		return
 	end
+	local mgr = TheWorld.components.ty_fisherman_manager
+	if mgr ~= nil and mgr:HasHouse() then
+		print("[ty] fisherman house already exists")
+		return
+	end
 	local x, y, z = player.Transform:GetWorldPosition()
 	local angle = (player.Transform:GetRotation() or 0) * DEGREES
 	local house = SpawnPrefab("ty_fisherman_house")
@@ -224,8 +230,7 @@ function c_ty_fisherman_house()
 		return
 	end
 	house.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
-	-- 铺面由房屋 oninit / spawn_shop 绑定生成
-	print("[ty] spawned ty_fisherman_house (+shop)")
+	print("[ty] spawned ty_fisherman_house")
 end
 
 function c_ty_fisherman_shop()
@@ -241,11 +246,30 @@ function c_ty_fisherman_shop()
 		return
 	end
 	shop.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
-	if shop.components.ty_fisherman_shop ~= nil then
-		shop.components.ty_fisherman_shop:RerollStock()
-		shop.components.ty_fisherman_shop:SetTending(true)
+	print("[ty] spawned ty_fisherman_shop (unlicensed)")
+end
+
+function c_ty_license_shop()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
 	end
-	print("[ty] spawned ty_fisherman_shop (forced open)")
+	local x, y, z = player.Transform:GetWorldPosition()
+	local shop = FindEntity(player, 12, nil, { "ty_fisherman_shop" })
+	if shop == nil then
+		print("[ty] no ty_fisherman_shop nearby")
+		return
+	end
+	local mgr = TheWorld.components.ty_fisherman_manager
+	if mgr == nil then
+		print("[ty] no ty_fisherman_manager")
+		return
+	end
+	if shop.components.ty_fisherman_shop ~= nil then
+		shop.components.ty_fisherman_shop:SetLicensed(true)
+	end
+	TheWorld:PushEvent("ty_register_licensed_shop", shop)
+	print("[ty] licensed shop (debug, free)")
 end
 
 function c_ty_farmhouse()
