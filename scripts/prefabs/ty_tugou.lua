@@ -93,9 +93,16 @@ local function OnAttacked(inst, data)
 	if attacker == nil or not attacker:IsValid() or attacker:HasTag("player") then
 		return
 	end
-	if IsUnfriendlyMonster(inst, attacker) then
-		inst.components.combat:SetTarget(attacker)
+	if not IsUnfriendlyMonster(inst, attacker) then
+		return
 	end
+	inst.components.combat:SetTarget(attacker)
+	inst.components.combat:ShareTarget(attacker, 20, function(dude)
+		return dude ~= inst
+			and dude:HasTag("ty_tugou")
+			and dude.components.health ~= nil
+			and not dude.components.health:IsDead()
+	end, 5)
 end
 
 local function OnNewTarget(inst, data)
@@ -141,11 +148,7 @@ local function fn()
 	inst.components.locomotor.walkspeed = TUNING.TY_TUGOU_WALK_SPEED or 4
 	inst.components.locomotor.runspeed = TUNING.TY_TUGOU_RUN_SPEED or 8
 
-	-- 与官方 warglet 一致：先 locomotor，再用官方 SGhound
-	inst:SetStateGraph("SGhound")
-	if inst.sg ~= nil and inst.sg.mem ~= nil then
-		inst.sg.mem.nolunarmutate = true
-	end
+	inst:SetStateGraph("SGty_tugou")
 
 	inst:AddComponent("health")
 	inst.components.health:SetMaxHealth(TUNING.TY_TUGOU_HEALTH or 300)
@@ -153,7 +156,7 @@ local function fn()
 	inst:AddComponent("combat")
 	inst.components.combat:SetDefaultDamage(TUNING.TY_TUGOU_DAMAGE or 25)
 	inst.components.combat:SetAttackPeriod(TUNING.TY_TUGOU_ATTACK_PERIOD or 2)
-	inst.components.combat:SetRange(TUNING.TY_TUGOU_ATTACK_RANGE or 3)
+	inst.components.combat:SetRange(TUNING.TY_TUGOU_ATTACK_RANGE or 3, TUNING.TY_TUGOU_HIT_RANGE or 4.5)
 	inst.components.combat:SetRetargetFunction(2, RetargetFn)
 	inst.components.combat:SetKeepTargetFunction(KeepTargetFn)
 	inst.components.combat:SetHurtSound(sounds.hurt)

@@ -6,7 +6,6 @@ require "behaviours/chaseandattack"
 require "behaviours/wander"
 
 local MAX_WANDER_DIST = TUNING.TY_TUGOU_WANDER_DIST or 20
-local MAX_CHASE_TIME = 8
 
 local function GetHomePos(inst)
 	return inst.components.knownlocations ~= nil
@@ -20,7 +19,7 @@ end)
 
 function TyTugouBrain:OnStart()
 	local root = PriorityNode({
-		ChaseAndAttack(self.inst, MAX_CHASE_TIME),
+		ChaseAndAttack(self.inst),
 		Wander(self.inst, GetHomePos, MAX_WANDER_DIST),
 	}, .25)
 

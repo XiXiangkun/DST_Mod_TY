@@ -8,6 +8,11 @@ local COLS = 4
 local ROWS = 3
 local CELL_W = 120
 local CELL_H = 130
+local SHOP_ATLAS = "images/ui/ty_fisherman_shop.xml"
+local SHOP_BG_TEX = "ty_fisherman_shop.tex"
+-- atlas UV 宽高比约 0.831（竖向铺面图）
+local BG_W = 1200
+local BG_H = 700
 
 local function GetItemAtlas(prefab)
 	local tex = prefab .. ".tex"
@@ -54,9 +59,8 @@ local TyFishermanShopScreen = Class(Screen, function(self, owner, shop)
 	self.root:SetVAnchor(ANCHOR_MIDDLE)
 	self.root:SetPosition(0, 20)
 
-	self.bg = self.root:AddChild(Image("images/global.xml", "square.tex"))
-	self.bg:SetSize(COLS * CELL_W + 80, ROWS * CELL_H + 100)
-	self.bg:SetTint(0.12, 0.14, 0.16, 0.92)
+	self.bg = self.root:AddChild(Image(SHOP_ATLAS, SHOP_BG_TEX))
+	self.bg:SetSize(BG_W, BG_H)
 
 	self.title = self.root:AddChild(Text(HEADERFONT, 34))
 	self.title:SetString(STRINGS.TY_FISHERMAN_SHOP_TITLE or "Fish Stall")
