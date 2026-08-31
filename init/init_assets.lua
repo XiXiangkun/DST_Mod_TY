@@ -3,8 +3,8 @@ GLOBAL.SH_ITEMS_ATLAS = MODROOT.."images/inventoryimages/ty_items.xml"
 Assets = {
 	Asset("ATLAS", "images/inventoryimages/ty_items.xml"),
 	Asset("IMAGE", "images/inventoryimages/ty_items.tex"),
-	Asset("ATLAS", "images/ui/ty_fisherman_shop.xml"),
-	Asset("IMAGE", "images/ui/ty_fisherman_shop.tex"),
+	Asset("ATLAS", "images/ui/ty_shops.xml"),
+	Asset("IMAGE", "images/ui/ty_shops.tex"),
 }
 
 local ITEMS = {

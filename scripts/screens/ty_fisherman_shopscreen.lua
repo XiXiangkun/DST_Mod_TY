@@ -8,11 +8,11 @@ local COLS = 4
 local ROWS = 3
 local CELL_W = 120
 local CELL_H = 130
-local SHOP_ATLAS = "images/ui/ty_fisherman_shop.xml"
+local SHOP_ATLAS = "images/ui/ty_shops.xml"
 local SHOP_BG_TEX = "ty_fisherman_shop.tex"
 -- atlas UV 宽高比约 0.831（竖向铺面图）
 local BG_W = 1200
-local BG_H = 700
+local BG_H = 786
 
 local function GetItemAtlas(prefab)
 	local tex = prefab .. ".tex"
@@ -94,6 +94,11 @@ local TyFishermanShopScreen = Class(Screen, function(self, owner, shop)
 			cell.buy.image:SetScale(0.9, 0.35)
 			cell.buy:SetTextSize(26)
 			cell.buy.text:SetColour(1, 0.92, 0.55, 1)
+			-- 价格数字略右移，左侧留给货币图标
+			cell.buy.text:SetPosition(10, 0)
+			cell.coin = cell.buy:AddChild(Image(SHOP_ATLAS, "ty_coin.tex"))
+			cell.coin:SetScale(0.35)
+			cell.coin:SetPosition(-18, 0)
 			cell.buy:SetOnClick(function()
 				self:OnBuy(idx)
 			end)
@@ -158,6 +163,7 @@ function TyFishermanShopScreen:Refresh()
 			cell.icon:Hide()
 			cell.stock:SetString("")
 			cell.buy:Hide()
+			cell.coin:Hide()
 			cell.bg:SetTint(0.18, 0.18, 0.2, 0.7)
 		else
 			local atlas, tex = GetItemAtlas(s.prefab)
@@ -167,6 +173,7 @@ function TyFishermanShopScreen:Refresh()
 			local price = s.price or 0
 			cell.buy:SetText(string.format(STRINGS.TY_FISHERMAN_SHOP_PRICE or "%d", price))
 			cell.buy:Show()
+			cell.coin:Show()
 			cell.bg:SetTint(0.22, 0.24, 0.28, 0.95)
 			local can_afford = gold >= price
 			if can_afford then
