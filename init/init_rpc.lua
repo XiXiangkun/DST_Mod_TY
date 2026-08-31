@@ -66,6 +66,23 @@ AddComponentAction("SCENE", "ty_fisherman_shop", function(inst, doer, actions, r
 	if tending then
 		table.insert(actions, ACTIONS.TY_OPEN_FISH_SHOP)
 	elseif not licensed then
+		-- 空手左键也可挂牌（从背包扣电子元件）
+		table.insert(actions, ACTIONS.TY_LICENSE_FISH_SHOP)
+	end
+end)
+
+-- 手持电子元件点铺面：走 USEITEM，否则只会出 SCENE/检查，看不到挂牌
+AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, actions, right)
+	if right or target == nil or not target:HasTag("ty_fisherman_shop") then
+		return
+	end
+	local license_item = TUNING.TY_FISHERMAN_SHOP_LICENSE_ITEM or "transistor"
+	if inst.prefab ~= license_item then
+		return
+	end
+	local licensed = target._licensed ~= nil and target._licensed:value()
+		or target:HasTag("ty_shop_licensed")
+	if not licensed then
 		table.insert(actions, ACTIONS.TY_LICENSE_FISH_SHOP)
 	end
 end)
