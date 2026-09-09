@@ -60,8 +60,10 @@ TUNING.TY_FISHERMAN_SHOP_COLS = 4
 TUNING.TY_FISHERMAN_SHOP_ROWS = 3
 -- 普通池 / 稀有池：price=金块单价，stock=出现时库存
 TUNING.TY_FISHERMAN_SHOP_COMMON = {
-	{ prefab = "pondfish", price = 1, stock = 3 },
-	{ prefab = "pondfish_cooked", price = 1, stock = 2 },
+	{ prefab = "oceanfish_small_1_inv", price = 1, stock = 3 },
+	{ prefab = "oceanfish_small_2_inv", price = 1, stock = 2 },
+	{ prefab = "oceanfish_small_3_inv", price = 1, stock = 3 },
+	{ prefab = "oceanfish_small_4_inv", price = 1, stock = 2 },
 	{ prefab = "fish", price = 1, stock = 3 },
 	{ prefab = "fish_cooked", price = 1, stock = 2 },
 	{ prefab = "fishmeat_small", price = 1, stock = 3 },

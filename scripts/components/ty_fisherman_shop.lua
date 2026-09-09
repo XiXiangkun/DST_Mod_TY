@@ -33,8 +33,9 @@ local function EncodeSlots(slots)
 	local parts = {}
 	for i = 1, 12 do
 		local s = slots[i]
-		if s ~= nil and s.prefab ~= nil and (s.stock or 0) > 0 then
-			parts[i] = string.format("%s:%d:%d", s.prefab, s.price or 0, s.stock)
+		-- 售罄也同步 prefab/price/stock=0，UI 仍显示图案
+		if s ~= nil and s.prefab ~= nil then
+			parts[i] = string.format("%s:%d:%d", s.prefab, s.price or 0, s.stock or 0)
 		else
 			parts[i] = ""
 		end
@@ -364,10 +365,7 @@ function TyFishermanShop:TryBuy(doer, slot_index)
 		return false
 	end
 
-	slot.stock = slot.stock - 1
-	if slot.stock <= 0 then
-		self.slots[slot_index] = nil
-	end
+	slot.stock = math.max(0, (slot.stock or 0) - 1)
 	self:Sync()
 
 	local item = SpawnPrefab(prefab)

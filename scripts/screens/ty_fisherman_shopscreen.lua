@@ -6,13 +6,13 @@ local ImageButton = require "widgets/imagebutton"
 
 local COLS = 4
 local ROWS = 3
-local CELL_W = 120
+local CELL_W = 160
 local CELL_H = 130
 local SHOP_ATLAS = "images/ui/ty_shops.xml"
 local SHOP_BG_TEX = "ty_fisherman_shop.tex"
 -- atlas UV 宽高比约 0.831（竖向铺面图）
-local BG_W = 1200
-local BG_H = 786
+local BG_W = 1100
+local BG_H = 700
 
 local function GetItemAtlas(prefab)
 	local tex = prefab .. ".tex"
@@ -77,25 +77,49 @@ local TyFishermanShopScreen = Class(Screen, function(self, owner, shop)
 			local cell = self.root:AddChild(Widget("cell" .. idx))
 			cell:SetPosition(origin_x + col * CELL_W, origin_y - row * CELL_H)
 
+			-- 背景方块
 			cell.bg = cell:AddChild(Image("images/global.xml", "square.tex"))
 			cell.bg:SetSize(100, 100)
 			cell.bg:SetTint(0.22, 0.24, 0.28, 0.95)
 
+			-- 物品图案
 			cell.icon = cell:AddChild(Image())
-			cell.icon:SetScale(0.7)
+			cell.icon:SetScale(1)
 			cell.icon:SetPosition(0, 12)
 
+			-- 库存数字
 			cell.stock = cell:AddChild(Text(NUMBERFONT, 22))
-			cell.stock:SetPosition(0, -28)
+			cell.stock:SetPosition(0, -25)
 			cell.stock:SetColour(0.9, 0.9, 0.9, 1)
 
+			-- 购买价格
 			cell.buy = cell:AddChild(ImageButton("images/global.xml", "square.tex"))
-			cell.buy:SetPosition(0, -42)
-			cell.buy.image:SetScale(0.9, 0.35)
+			cell.buy:SetPosition(0, -48)
+			-- 悬停略放大，但仍保持扁平条比例（勿用默认 1.2 正方形）
+			local buy_sx, buy_sy = 0.9, 0.35
+			local buy_fx, buy_fy = 1.0, 0.39
+			cell.buy.scale_on_focus = true
+			cell.buy.normal_scale = { buy_sx, buy_sy, 1 }
+			cell.buy.focus_scale = { buy_fx, buy_fy, 1 }
+			cell.buy.image:SetScale(buy_sx, buy_sy)
 			cell.buy:SetTextSize(26)
-			cell.buy.text:SetColour(1, 0.92, 0.55, 1)
+			-- ImageButton 启用/禁用/聚焦会改字色，三态统一黑色
+			local price_colour = { 0, 0, 0, 1 }
+			cell.buy:SetTextColour(unpack(price_colour))
+			if cell.buy.SetTextFocusColour ~= nil then
+				cell.buy:SetTextFocusColour(unpack(price_colour))
+			else
+				cell.buy.textfocuscolour = price_colour
+			end
+			if cell.buy.SetTextDisabledColour ~= nil then
+				cell.buy:SetTextDisabledColour(unpack(price_colour))
+			else
+				cell.buy.textdisabledcolour = price_colour
+			end
 			-- 价格数字略右移，左侧留给货币图标
 			cell.buy.text:SetPosition(10, 0)
+
+			-- 货币图标
 			cell.coin = cell.buy:AddChild(Image(SHOP_ATLAS, "ty_coin.tex"))
 			cell.coin:SetScale(0.35)
 			cell.coin:SetPosition(-18, 0)
@@ -159,29 +183,40 @@ function TyFishermanShopScreen:Refresh()
 	for i = 1, 12 do
 		local cell = self.cells[i]
 		local s = slots[i]
-		if s == nil or s.prefab == nil or (s.stock or 0) <= 0 then
+		if s == nil or s.prefab == nil then
+			-- 从未上架的空位
 			cell.icon:Hide()
 			cell.stock:SetString("")
 			cell.buy:Hide()
 			cell.coin:Hide()
 			cell.bg:SetTint(0.18, 0.18, 0.2, 0.7)
 		else
+			local stock = s.stock or 0
+			local price = s.price or 0
 			local atlas, tex = GetItemAtlas(s.prefab)
 			cell.icon:SetTexture(atlas, tex)
 			cell.icon:Show()
-			cell.stock:SetString(string.format(STRINGS.TY_FISHERMAN_SHOP_STOCK or "x%d", s.stock))
-			local price = s.price or 0
-			cell.buy:SetText(string.format(STRINGS.TY_FISHERMAN_SHOP_PRICE or "%d", price))
-			cell.buy:Show()
-			cell.coin:Show()
-			cell.bg:SetTint(0.22, 0.24, 0.28, 0.95)
-			local can_afford = gold >= price
-			if can_afford then
-				cell.buy:Enable()
-				cell.buy.text:SetColour(1, 0.92, 0.55, 1)
+			cell.stock:SetString(string.format(STRINGS.TY_FISHERMAN_SHOP_STOCK or "x%d", stock))
+			cell.bg:SetTint(0.22, 0.24, 0.28, stock > 0 and 0.95 or 0.7)
+
+			if stock <= 0 then
+				-- 售罄：保留图案与库存 0，隐藏购买
+				cell.buy:Hide()
+				cell.coin:Hide()
+				cell.stock:SetColour(0.72, 0.38, 0.35, 1)
 			else
-				cell.buy:Disable()
-				cell.buy.text:SetColour(0.5, 0.45, 0.35, 1)
+				cell.stock:SetColour(0.9, 0.9, 0.9, 1)
+				cell.buy:SetText(string.format(STRINGS.TY_FISHERMAN_SHOP_PRICE or "%d", price))
+				cell.buy:Show()
+				cell.coin:Show()
+				local can_buy = gold >= price
+				if can_buy then
+					cell.buy:Enable()
+				else
+					cell.buy:Disable()
+				end
+				cell.buy.text:SetColour(0, 0, 0, 1)
+				cell.buy.image:SetScale(0.9, 0.35)
 			end
 		end
 	end
