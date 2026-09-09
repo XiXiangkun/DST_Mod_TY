@@ -12,7 +12,7 @@ end
 
 name = "归田录"
 author = "素冥, 你要帮帮威吊"
-version = "0.0.1"
+version = "1.0.0"
 
 local info_version = "[ Version " .. version .. " ]\n"
 description = info_version .. [[

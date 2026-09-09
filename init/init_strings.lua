@@ -100,6 +100,8 @@ if lang == "en" then
 	}
 	STRINGS.NAMES.TY_TUGOU = "Yellow Dog"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_TUGOU = "A big farm dog. It keeps monsters away."
+	STRINGS.NAMES.TY_COIN = "Coin"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_COIN = "A shiny coin. Good for trading."
 else
 	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
 	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子"
@@ -199,4 +201,6 @@ else
 	}
 	STRINGS.NAMES.TY_TUGOU = "大黄狗"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_TUGOU = "田边看家的大黄狗，专咬不友好的怪物。"
+	STRINGS.NAMES.TY_COIN = "金币"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_COIN = "亮闪闪的金币，可以用来交易。"
 end

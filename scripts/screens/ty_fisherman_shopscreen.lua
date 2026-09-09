@@ -107,11 +107,11 @@ local TyFishermanShopScreen = Class(Screen, function(self, owner, shop)
 		end
 	end
 
-	self.close_btn = self.root:AddChild(ImageButton("images/global.xml", "square.tex"))
+	self.close_btn = self.root:AddChild(ImageButton(SHOP_ATLAS, "ty_fisherman_shop_close.tex"))
 	self.close_btn:SetPosition(COLS * CELL_W * 0.5 + 10, ROWS * CELL_H * 0.5 + 20)
 	self.close_btn:SetScale(0.35, 0.28)
-	self.close_btn:SetText("X")
-	self.close_btn:SetTextSize(32)
+	-- self.close_btn:SetText("X")
+	-- self.close_btn:SetTextSize(32)
 	self.close_btn:SetOnClick(function() self:Close() end)
 
 	if shop ~= nil then

@@ -19,3 +19,5 @@ table.insert(Assets, Asset("ATLAS_BUILD", "images/inventoryimages/ty_items.xml",
 for _, v in ipairs(ITEMS) do
 	RegisterInventoryItemAtlas("images/inventoryimages/ty_items.xml", v..".tex")
 end
+
+RegisterInventoryItemAtlas("images/ui/ty_shops.xml", "ty_coin.tex")
