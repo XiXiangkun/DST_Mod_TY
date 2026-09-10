@@ -52,8 +52,8 @@ local function fn()
 	inst:AddComponent("inspectable")
 
 	inst:AddComponent("inventoryitem")
-	-- inst.components.inventoryitem.atlasname = "images/ui/ty_shops.xml"
-	-- inst.components.inventoryitem.imagename = "ty_coin"
+	inst.components.inventoryitem.atlasname = "images/inventoryimages/ty_items.xml"
+	inst.components.inventoryitem.imagename = "ty_coin"
 	
 	inst.components.inventoryitem:SetSinks(true)
 

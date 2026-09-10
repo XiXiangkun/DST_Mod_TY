@@ -92,7 +92,7 @@ local function MakeSeed(kind, anim, inv_image)
 		inst:AddComponent("inspectable")
 		inst:AddComponent("inventoryitem")
 		inst.components.inventoryitem.imagename = inv_image
-		inst.components.inventoryitem.atlasname = "images/inventoryimages.xml"
+		inst.components.inventoryitem.atlasname = "images/inventoryimages/ty_items.xml"
 
 		inst:AddComponent("tradable")
 
@@ -112,7 +112,7 @@ local function MakeSeed(kind, anim, inv_image)
 		MakePlacer(placer_name, "ty_paddy_seed", "ty_paddy_seed", anim)
 end
 
-local fish_seed, fish_placer = MakeSeed("fish", "idle_fish", "pondfish")
-local shrimp_seed, shrimp_placer = MakeSeed("shrimp", "idle_shrimp", "wobster_sheller_land")
+local fish_seed, fish_placer = MakeSeed("fish", "idle_fish", "ty_fish_seed")
+local shrimp_seed, shrimp_placer = MakeSeed("shrimp", "idle_shrimp", "ty_shrimp_seed")
 
 return fish_seed, fish_placer, shrimp_seed, shrimp_placer

@@ -92,8 +92,8 @@ local function commonfn(anim, loop, dryable, cookable, scale)
 
 	inst:AddComponent("inventoryitem")
 	-- 暂无专用图标
-	inst.components.inventoryitem.imagename = cookable and "fish" or "fish_cooked"
-	inst.components.inventoryitem.atlasname = "images/inventoryimages.xml"
+	inst.components.inventoryitem.imagename = cookable and "ty_grass_carp" or "ty_grass_carp_cooked"
+	inst.components.inventoryitem.atlasname = "images/inventoryimages/ty_items.xml"
 
 	MakeHauntableLaunchAndPerish(inst)
 
