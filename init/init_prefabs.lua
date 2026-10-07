@@ -11,4 +11,5 @@ PrefabFiles = {
 	"ty_fisherman_shop",
 	"ty_tugou",
 	"ty_coin",
+	"ty_mine",
 }

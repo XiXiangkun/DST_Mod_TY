@@ -18,6 +18,7 @@
 -- c_ty_license_shop()    给附近最近铺面强制挂牌（调试，不耗电子元件）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
+-- c_ty_mine()            身前生成矿场（默认不可采，2 天后可挖）
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -302,4 +303,20 @@ function c_ty_tugou()
 	end
 	dog.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
 	print("[ty] spawned ty_tugou")
+end
+
+function c_ty_mine()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local mine = SpawnPrefab("ty_mine")
+	if mine == nil then
+		print("[ty] failed to spawn ty_mine")
+		return
+	end
+	mine.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned ty_mine (depleted)")
 end

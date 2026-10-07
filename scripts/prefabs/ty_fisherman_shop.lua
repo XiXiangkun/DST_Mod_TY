@@ -4,7 +4,7 @@
 
 local assets =
 {
-	Asset("ANIM", "anim/ms_fisherman_shop.zip"),
+	Asset("ANIM", "anim/ty_fisherman_shop.zip"),
 }
 
 local prefabs =
@@ -77,8 +77,8 @@ local function fn()
 
 	inst.MiniMapEntity:SetIcon("fish.png")
 
-	inst.AnimState:SetBank("ms_fisherman_shop")
-	inst.AnimState:SetBuild("ms_fisherman_shop")
+	inst.AnimState:SetBank("ty_fisherman_shop")
+	inst.AnimState:SetBuild("ty_fisherman_shop")
 	inst.AnimState:PlayAnimation("idle", true)
 
 	inst:AddTag("structure")
@@ -121,4 +121,4 @@ local function fn()
 end
 
 return Prefab("ty_fisherman_shop", fn, assets, prefabs),
-	MakePlacer("ty_fisherman_shop_placer", "ms_fisherman_shop", "ms_fisherman_shop", "idle")
+	MakePlacer("ty_fisherman_shop_placer", "ty_fisherman_shop", "ty_fisherman_shop", "idle")
