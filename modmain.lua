@@ -11,6 +11,7 @@ modimport("init/init_prefabs")
 modimport("init/init_strings")
 modimport("init/init_recipes")
 modimport("init/init_rpc")
+modimport("init/init_plough")
 modimport("init/init_postinit")
 
 require("debugcommands")

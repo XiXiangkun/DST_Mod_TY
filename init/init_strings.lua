@@ -108,6 +108,27 @@ if lang == "en" then
 		READY = "There's stone ready to be mined.",
 		DEPLETED = "Nothing worth picking at right now.",
 	}
+	STRINGS.NAMES.TY_PEACHTREE = "Peach Tree"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PEACHTREE = {
+		GENERIC = "A peach tree.",
+		CHOPPED = "Just a stump now.",
+		BURNING = "It's on fire!",
+	}
+	STRINGS.NAMES.TY_WILLOW = "Willow"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_WILLOW = {
+		GENERIC = "A willow tree.",
+		CHOPPED = "Just a stump now.",
+		BURNING = "It's on fire!",
+	}
+	STRINGS.NAMES.TY_PINE = "Pine"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PINE = {
+		GENERIC = "A pine tree.",
+		CHOPPED = "Just a stump now.",
+		BURNING = "It's on fire!",
+	}
+	STRINGS.NAMES.TY_PLOUGH = "Plough"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PLOUGH = "Equip it and walk to till dry paddies."
+	STRINGS.ACTIONS.TY_STOP_PLOUGH = "Put Away"
 else
 	STRINGS.NAMES.TY_PADDY_WATER = "水田水面"
 	STRINGS.NAMES.TY_RICE_SEEDS_1 = "水稻种子"
@@ -215,4 +236,25 @@ else
 		READY = "可以开采了。",
 		DEPLETED = "现在没什么可挖的。",
 	}
+	STRINGS.NAMES.TY_PEACHTREE = "桃树"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PEACHTREE = {
+		GENERIC = "一棵桃树。",
+		CHOPPED = "只剩树桩了。",
+		BURNING = "着火了！",
+	}
+	STRINGS.NAMES.TY_WILLOW = "柳树"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_WILLOW = {
+		GENERIC = "一棵柳树。",
+		CHOPPED = "只剩树桩了。",
+		BURNING = "着火了！",
+	}
+	STRINGS.NAMES.TY_PINE = "松树"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PINE = {
+		GENERIC = "一棵松树。",
+		CHOPPED = "只剩树桩了。",
+		BURNING = "着火了！",
+	}
+	STRINGS.NAMES.TY_PLOUGH = "犁"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PLOUGH = "装备后走动即可把脚下开成干涸水田。"
+	STRINGS.ACTIONS.TY_STOP_PLOUGH = "收起犁"
 end

@@ -19,6 +19,10 @@
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
 -- c_ty_mine()            身前生成矿场（默认不可采，2 天后可挖）
+-- c_ty_peachtree()       身前生成桃树
+-- c_ty_willow()          身前生成柳树
+-- c_ty_pine()            身前生成松树
+-- c_ty_plough()          给予犁 x1
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -319,4 +323,42 @@ function c_ty_mine()
 	end
 	mine.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
 	print("[ty] spawned ty_mine (depleted)")
+end
+
+local function c_ty_spawn_tree(prefab)
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local tree = SpawnPrefab(prefab)
+	if tree == nil then
+		print("[ty] failed to spawn "..tostring(prefab))
+		return
+	end
+	tree.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned "..prefab)
+end
+
+function c_ty_peachtree()
+	c_ty_spawn_tree("ty_peachtree")
+end
+
+function c_ty_willow()
+	c_ty_spawn_tree("ty_willow")
+end
+
+function c_ty_pine()
+	c_ty_spawn_tree("ty_pine")
+end
+
+function c_ty_plough()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local item = c_give("ty_plough", 1)
+	print("[ty] gave ty_plough")
+	return item
 end

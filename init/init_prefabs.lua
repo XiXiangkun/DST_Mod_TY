@@ -12,4 +12,6 @@ PrefabFiles = {
 	"ty_tugou",
 	"ty_coin",
 	"ty_mine",
+	"ty_trees",
+	"ty_plough",
 }

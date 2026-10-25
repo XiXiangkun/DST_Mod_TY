@@ -477,6 +477,67 @@ function TyPaddyManager:TillAtPoint(x, y, z)
 	return self:Till(tx, ty)
 end
 
+-- 犁地开垦：孤立格为干田(0)；贴着已有水田则并入连通水域，水位取邻格平均（不把本格当满水）
+function TyPaddyManager:CanPloughTile(tx, ty)
+	if tx == nil or ty == nil or TheWorld.Map == nil then
+		return false
+	end
+	local key = TileKey(tx, ty)
+	if self.tiles[key] ~= nil then
+		return false
+	end
+	local tile = TheWorld.Map:GetTile(tx, ty)
+	if PaddyTiles.IsPaddyTile(tile) then
+		return false
+	end
+	local cx, cy, cz = TheWorld.Map:GetTileCenterPoint(tx, ty)
+	if cx == nil then
+		return false
+	end
+	if TheWorld.Map.IsLandTileAtPoint ~= nil and not TheWorld.Map:IsLandTileAtPoint(cx, cy, cz) then
+		return false
+	end
+	if TheWorld.Map.CanPlantAtPoint ~= nil and not TheWorld.Map:CanPlantAtPoint(cx, cy, cz) then
+		return false
+	end
+	return true
+end
+
+function TyPaddyManager:TillPlough(tx, ty)
+	if not self:CanPloughTile(tx, ty) then
+		return false
+	end
+
+	local key = TileKey(tx, ty)
+	local body_keys = self:CollectBodyKeysIncluding(tx, ty)
+
+	local sum = 0
+	local count = 0
+	for i = 1, #body_keys do
+		local bkey = body_keys[i]
+		if bkey ~= key and self.tiles[bkey] ~= nil then
+			sum = sum + (self.tiles[bkey].water or 0)
+			count = count + 1
+		end
+	end
+	-- 无邻田 → 干田；有邻田 → 取邻域平均并写入整片（邻格水位不变）
+	local avg = count > 0 and Clamp01(sum / count) or 0
+
+	if self.tiles[key] == nil then
+		self.tiles[key] = { water = 0 }
+	end
+
+	self:ApplyGroundTile(tx, ty, avg)
+	self:SetBodyWater(body_keys, avg, true)
+
+	return true
+end
+
+function TyPaddyManager:TillPloughAtPoint(x, y, z)
+	local tx, ty = TheWorld.Map:GetTileCoordsAtPoint(x, y, z)
+	return self:TillPlough(tx, ty)
+end
+
 --------------------------------------------------------------------------
 -- 水面实体
 
