@@ -89,7 +89,9 @@ local function OnLoad(inst, data)
 	end
 end
 
-local function MakeTree(name, bank, build)
+local function MakeTree(name, bank, build, scale)
+	scale = scale or 1
+
 	local assets =
 	{
 		Asset("ANIM", "anim/"..build..".zip"),
@@ -110,12 +112,13 @@ local function MakeTree(name, bank, build)
 		inst.entity:AddDynamicShadow()
 		inst.entity:AddNetwork()
 
-		MakeObstaclePhysics(inst, .25)
+		MakeObstaclePhysics(inst, .25 * scale)
+		inst.Transform:SetScale(scale, scale, scale)
 
 		inst.MiniMapEntity:SetIcon(name..".tex")
 		inst.MiniMapEntity:SetPriority(1)
 
-		inst.DynamicShadow:SetSize(1.5, .75)
+		inst.DynamicShadow:SetSize(1.5 * scale, .75 * scale)
 
 		inst.AnimState:SetBank(bank)
 		inst.AnimState:SetBuild(build)
@@ -160,4 +163,4 @@ end
 
 return MakeTree("ty_peachtree", "ty_peachtree", "ty_peachtree"),
 	MakeTree("ty_willow", "ty_willow", "ty_willow"),
-	MakeTree("ty_pine", "ty_pine", "ty_pine")
+	MakeTree("ty_pine", "ty_pine", "ty_pine", 1.25)
