@@ -18,7 +18,8 @@
 -- c_ty_license_shop()    给附近最近铺面强制挂牌（调试，不耗电子元件）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
--- c_ty_mine()            身前生成矿场（默认不可采，2 天后可挖）
+-- c_ty_mine()            身前生成矿场（默认不可采，2 天后可采）
+-- c_ty_forestfarm()      身前生成林场（默认不可采，2 天后可采）
 -- c_ty_peachtree()       身前生成桃树
 -- c_ty_willow()          身前生成柳树
 -- c_ty_pine()            身前生成松树
@@ -309,20 +310,28 @@ function c_ty_tugou()
 	print("[ty] spawned ty_tugou")
 end
 
-function c_ty_mine()
+local function c_ty_spawn_resource_farm(prefab)
 	local player = ConsoleCommandPlayer()
 	if player == nil then
 		return
 	end
 	local x, y, z = player.Transform:GetWorldPosition()
 	local angle = (player.Transform:GetRotation() or 0) * DEGREES
-	local mine = SpawnPrefab("ty_mine")
-	if mine == nil then
-		print("[ty] failed to spawn ty_mine")
+	local farm = SpawnPrefab(prefab)
+	if farm == nil then
+		print("[ty] failed to spawn " .. prefab)
 		return
 	end
-	mine.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
-	print("[ty] spawned ty_mine (depleted)")
+	farm.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned " .. prefab .. " (depleted)")
+end
+
+function c_ty_mine()
+	c_ty_spawn_resource_farm("ty_mine")
+end
+
+function c_ty_forestfarm()
+	c_ty_spawn_resource_farm("ty_forestfarm")
 end
 
 local function c_ty_spawn_tree(prefab)

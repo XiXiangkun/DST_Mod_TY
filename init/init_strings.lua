@@ -105,8 +105,14 @@ if lang == "en" then
 	STRINGS.NAMES.TY_MINE = "Quarry"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_MINE = {
 		GENERIC = "A stone quarry.",
-		READY = "There's stone ready to be mined.",
+		READY = "There's stone ready to gather.",
 		DEPLETED = "Nothing worth picking at right now.",
+	}
+	STRINGS.NAMES.TY_FORESTFARM = "Forest Farm"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FORESTFARM = {
+		GENERIC = "A managed grove of trees.",
+		READY = "There's wood ready to gather.",
+		DEPLETED = "The trees need time to grow back.",
 	}
 	STRINGS.NAMES.TY_PEACHTREE = "Peach Tree"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PEACHTREE = {
@@ -233,8 +239,14 @@ else
 	STRINGS.NAMES.TY_MINE = "矿场"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_MINE = {
 		GENERIC = "一座矿场。",
-		READY = "可以开采了。",
-		DEPLETED = "现在没什么可挖的。",
+		READY = "可以采集了。",
+		DEPLETED = "现在没什么可采的。",
+	}
+	STRINGS.NAMES.TY_FORESTFARM = "林场"
+	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_FORESTFARM = {
+		GENERIC = "一片打理好的林场。",
+		READY = "可以采集了。",
+		DEPLETED = "树木还在生长。",
 	}
 	STRINGS.NAMES.TY_PEACHTREE = "桃树"
 	STRINGS.CHARACTERS.GENERIC.DESCRIBE.TY_PEACHTREE = {
