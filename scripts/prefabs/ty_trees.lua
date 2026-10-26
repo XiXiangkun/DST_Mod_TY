@@ -106,10 +106,14 @@ local function MakeTree(name, bank, build)
 		inst.entity:AddTransform()
 		inst.entity:AddAnimState()
 		inst.entity:AddSoundEmitter()
+		inst.entity:AddMiniMapEntity()
 		inst.entity:AddDynamicShadow()
 		inst.entity:AddNetwork()
 
 		MakeObstaclePhysics(inst, .25)
+
+		inst.MiniMapEntity:SetIcon(name..".tex")
+		inst.MiniMapEntity:SetPriority(1)
 
 		inst.DynamicShadow:SetSize(1.5, .75)
 

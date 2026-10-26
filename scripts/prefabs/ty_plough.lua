@@ -167,8 +167,8 @@ local function fn()
 	inst.components.equippable.equipslot = EQUIPSLOTS.HANDS
 	inst.components.equippable.walkspeedmult = TUNING.TY_PLOUGH_SPEED_MULT or 0.6
 
-	inst:AddComponent("weapon")
-	inst.components.weapon:SetDamage(TUNING.TY_PLOUGH_DAMAGE or 17)
+	-- inst:AddComponent("weapon")
+	-- inst.components.weapon:SetDamage(TUNING.TY_PLOUGH_DAMAGE or 17)
 
 	MakeHauntableLaunch(inst)
 

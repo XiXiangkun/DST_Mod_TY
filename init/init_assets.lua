@@ -1,16 +1,23 @@
 GLOBAL.SH_ITEMS_ATLAS = MODROOT.."images/inventoryimages/ty_items.xml"
 
 Assets = {
+	-- 物品
 	Asset("ATLAS", "images/inventoryimages/ty_items.xml"),
 	Asset("IMAGE", "images/inventoryimages/ty_items.tex"),
+	-- 商店UI
 	Asset("ATLAS", "images/ui/ty_shops.xml"),
 	Asset("IMAGE", "images/ui/ty_shops.tex"),
+	-- 小地图图标
+    Asset("IMAGE", "images/ty_minimaps.tex"),
+    Asset("ATLAS", "images/ty_minimaps.xml"),
 }
 
 local ITEMS = {
+	"ty_coin",
 	"ty_grass_carp",
 	"ty_grass_carp_cooked",
 	"ty_fish_seed",
+	"ty_plough",
 	"ty_shrimp_seed",
 }
 
@@ -20,4 +27,5 @@ for _, v in ipairs(ITEMS) do
 	RegisterInventoryItemAtlas("images/inventoryimages/ty_items.xml", v..".tex")
 end
 
-RegisterInventoryItemAtlas("images/ui/ty_shops.xml", "ty_coin.tex")
+-- 用于地图的图标
+AddMinimapAtlas("images/ty_minimaps.xml")

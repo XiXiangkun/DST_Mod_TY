@@ -143,9 +143,13 @@ local function MakeResourceFarm(def)
 		inst.entity:AddTransform()
 		inst.entity:AddAnimState()
 		inst.entity:AddSoundEmitter()
+		inst.entity:AddMiniMapEntity()
 		inst.entity:AddNetwork()
 
 		MakeObstaclePhysics(inst, def.physics_radius or 1.5)
+
+		inst.MiniMapEntity:SetIcon(def.name..".tex")
+		inst.MiniMapEntity:SetPriority(1)
 
 		inst.AnimState:SetBank(def.bank)
 		inst.AnimState:SetBuild(def.build)
