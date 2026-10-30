@@ -14,4 +14,6 @@ PrefabFiles = {
 	"ty_resource_farms",
 	"ty_trees",
 	"ty_plough",
+	"ty_turf",
+	"ty_pethouse",
 }

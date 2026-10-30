@@ -50,3 +50,32 @@ AddRecipe2(
 	},
 	{ "STRUCTURES" }
 )
+
+AddRecipe2(
+	"ty_turf",
+	{
+		Ingredient("rocks", 2),
+		Ingredient("cutstone", 1),
+	},
+	TECH.SCIENCE_ONE,
+	{
+		numtogive = 4,
+		-- 暂用官方地皮图标，自制图标做好后再换
+		image = "turf_rocky.tex",
+	},
+	{ "STRUCTURES", "DECOR" }
+)
+
+AddRecipe2(
+	"ty_pethouse",
+	{
+		Ingredient("boards", 3),
+		Ingredient("cutgrass", 2),
+	},
+	TECH.SCIENCE_ONE,
+	{
+		placer = "ty_pethouse_placer",
+		min_spacing = 1.5,
+	},
+	{ "STRUCTURES" }
+)

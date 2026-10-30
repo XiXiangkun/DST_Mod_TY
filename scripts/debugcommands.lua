@@ -18,12 +18,14 @@
 -- c_ty_license_shop()    给附近最近铺面强制挂牌（调试，不耗电子元件）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
+-- c_ty_pethouse()        身前放置狗屋
 -- c_ty_mine()            身前生成矿场（默认不可采，2 天后可采）
 -- c_ty_forestfarm()      身前生成林场（默认不可采，2 天后可采）
 -- c_ty_peachtree()       身前生成桃树
 -- c_ty_willow()          身前生成柳树
 -- c_ty_pine()            身前生成松树
 -- c_ty_plough()          给予犁 x1
+-- c_ty_turf()            给予石砖 x20
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -310,6 +312,23 @@ function c_ty_tugou()
 	print("[ty] spawned ty_tugou")
 end
 
+function c_ty_pethouse()
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local house = SpawnPrefab("ty_pethouse")
+	if house == nil then
+		print("[ty] failed to spawn ty_pethouse")
+		return
+	end
+	house.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	print("[ty] spawned ty_pethouse")
+end
+
+
 local function c_ty_spawn_resource_farm(prefab)
 	local player = ConsoleCommandPlayer()
 	if player == nil then
@@ -369,5 +388,16 @@ function c_ty_plough()
 	end
 	local item = c_give("ty_plough", 1)
 	print("[ty] gave ty_plough")
+	return item
+end
+
+function c_ty_turf(count)
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	count = count or 20
+	local item = c_give("ty_turf", count)
+	print(string.format("[ty] gave ty_turf x%d", count))
 	return item
 end

@@ -123,6 +123,9 @@ local function OnUnequip(inst, owner)
 
 	UnbindOwner(inst, owner)
 	owner:RemoveTag("ty_ploughing")
+	if owner.SoundEmitter ~= nil then
+		owner.SoundEmitter:KillSound("ty_plough_dig")
+	end
 	ClearPloughVisuals(owner)
 
 	-- ty_plough_stop 会自己切状态，避免抢状态

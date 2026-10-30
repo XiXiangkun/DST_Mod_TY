@@ -1,5 +1,10 @@
 --[[
 	犁：Action（右键自己收起）+ 玩家 StateGraph（取出 / 手持 / 犁地移动）
+
+	移动动画参考官方 pushing_walk（滚雪球）：
+	- pre + loop 同状态队列：PlayAnimation(pre) → PushAnimation(loop)
+	- 起步后短时不可停（canstop），保证 pre 能看完
+	- 停下时同状态播 pst，再 soft 进 holding idle（不冲掉 pst）
 ]]
 
 local function InitPloughTileMem(inst)
@@ -29,6 +34,45 @@ end
 
 local function EnsurePloughing(inst)
 	return inst:HasTag("ty_ploughing")
+end
+
+-- 与 anim/player_acitons_ty_plough.zip 中帧数一致（30fps）
+local PLOUGH_PRE_FRAMES = 20
+local PLOUGH_PST_FRAMES = 20
+
+local function GetPloughAnimTimeout(inst, fallback_frames)
+	local len = inst.AnimState:GetCurrentAnimationLength()
+	if len == nil or len <= 0 then
+		return fallback_frames * FRAMES
+	end
+	return len
+end
+
+local function SetLocomotorDirFromData(inst, data)
+	if data == nil or data.dir == nil then
+		return
+	end
+	if inst.components.locomotor ~= nil then
+		inst.components.locomotor:SetMoveDir(data.dir)
+	else
+		inst.Transform:SetRotation(data.dir)
+	end
+end
+
+-- 鼹鼠地下钻行循环音
+local PLOUGH_DIG_SOUND = "dontstarve_DLC001/creatures/mole/move"
+local PLOUGH_DIG_SOUND_NAME = "ty_plough_dig"
+
+local function StartPloughDigSound(inst)
+	if inst.SoundEmitter ~= nil and not inst.SoundEmitter:PlayingSound(PLOUGH_DIG_SOUND_NAME) then
+		inst.SoundEmitter:PlaySound(PLOUGH_DIG_SOUND, PLOUGH_DIG_SOUND_NAME)
+	end
+end
+
+local function StopPloughDigSound(inst)
+	if inst.SoundEmitter ~= nil then
+		inst.SoundEmitter:KillSound(PLOUGH_DIG_SOUND_NAME)
+	end
 end
 
 --------------------------------------------------------------------------
@@ -74,6 +118,7 @@ local function MakePloughStates(is_client)
 		tags = { "busy", "doing", "ty_plough" },
 
 		onenter = function(inst)
+			StopPloughDigSound(inst)
 			inst.components.locomotor:Stop()
 			inst:PerformBufferedAction()
 			-- Unequip 会清 tag 并切 idle；若仍在犁地则回手持
@@ -102,10 +147,12 @@ local function MakePloughStates(is_client)
 		{
 			EventHandler("animover", function(inst)
 				if inst.AnimState:AnimDone() then
-					if EnsurePloughing(inst) then
-						inst.sg:GoToState("ty_plough_idle")
-					else
+					if not EnsurePloughing(inst) then
 						inst.sg:GoToState("idle")
+					elseif inst.components.locomotor:WantsToMoveForward() then
+						inst.sg:GoToState("ty_plough_move")
+					else
+						inst.sg:GoToState("ty_plough_idle")
 					end
 				end
 			end),
@@ -116,9 +163,17 @@ local function MakePloughStates(is_client)
 		name = "ty_plough_idle",
 		tags = { "idle", "canrotate", "ty_plough" },
 
-		onenter = function(inst)
+		-- soft=true：从 move 收步过来，Push holding，让 pst 播完（对齐 idle(..., true)）
+		onenter = function(inst, soft)
+			if inst.components.locomotor:WantsToMoveForward() then
+				inst.sg:GoToState("ty_plough_move")
+				return
+			end
+			StopPloughDigSound(inst)
 			inst.components.locomotor:Stop()
-			if not inst.AnimState:IsCurrentAnimation("ty_holding_plough") then
+			if soft then
+				inst.AnimState:PushAnimation("ty_holding_plough", true)
+			elseif not inst.AnimState:IsCurrentAnimation("ty_holding_plough") then
 				inst.AnimState:PlayAnimation("ty_holding_plough", true)
 			end
 			if inst.sg.mem.ty_plough_tx == nil then
@@ -127,102 +182,88 @@ local function MakePloughStates(is_client)
 		end,
 	}
 
-	local plough_pre = State{
-		name = "ty_plough_pre",
+	-- 合并 pre/loop/pst：参考 pushing_walk
+	local plough_move = State{
+		name = "ty_plough_move",
 		tags = { "moving", "running", "canrotate", "ty_plough", "autopredict" },
 
 		onenter = function(inst)
 			if not EnsurePloughing(inst) then
+				StopPloughDigSound(inst)
 				inst.sg:GoToState("run_start")
 				return
 			end
 			inst.components.locomotor:RunForward()
+			-- 同状态队列：pre 播完自动接 loop，不依赖状态切换
 			inst.AnimState:PlayAnimation("ty_plow_pre")
+			inst.AnimState:PushAnimation("ty_plow_loop", true)
+			StartPloughDigSound(inst)
+			inst.sg.statemem.canstop = false
+			inst.sg.statemem.stopping = false
+			-- 至少等 pre 时长才允许停，避免点按看不到起步
+			inst.sg:SetTimeout(PLOUGH_PRE_FRAMES * FRAMES)
 		end,
 
-		onupdate = function(inst)
+		onupdate = function(inst, dt)
 			if not EnsurePloughing(inst) then
+				StopPloughDigSound(inst)
 				inst.sg:GoToState("run")
 				return
 			end
-			inst.components.locomotor:RunForward()
-			TryPloughFootstep(inst)
-		end,
 
-		events =
-		{
-			EventHandler("animover", function(inst)
-				if inst.AnimState:AnimDone() then
-					inst.sg:GoToState("ty_plough_loop")
+			-- 收步中：等 pst 播完再 soft 进 holding
+			if inst.sg.statemem.stopping then
+				if inst.sg.statemem.exitdelay ~= nil then
+					if inst.sg.statemem.exitdelay > dt then
+						inst.sg.statemem.exitdelay = inst.sg.statemem.exitdelay - dt
+					else
+						inst.sg.statemem.exitdelay = nil
+						if EnsurePloughing(inst) then
+							inst.sg:GoToState("ty_plough_idle", true)
+						else
+							inst.sg:GoToState("idle", true)
+						end
+					end
 				end
-			end),
-		},
-	}
-
-	local plough_loop = State{
-		name = "ty_plough_loop",
-		tags = { "moving", "running", "canrotate", "ty_plough", "autopredict" },
-
-		onenter = function(inst)
-			if not EnsurePloughing(inst) then
-				inst.sg:GoToState("run")
 				return
 			end
-			inst.components.locomotor:RunForward()
-			if not inst.AnimState:IsCurrentAnimation("ty_plow_loop") then
-				inst.AnimState:PlayAnimation("ty_plow_loop", true)
-			end
-			inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength())
-		end,
 
-		onupdate = function(inst)
-			if not EnsurePloughing(inst) then
-				inst.sg:GoToState("run")
+			-- 可停且松键 → 播 pst（仍留在本状态，对齐 pushing_walk）
+			if inst.sg.statemem.canstop
+				and not inst.components.locomotor:WantsToMoveForward() then
+				StopPloughDigSound(inst)
+				inst.AnimState:PlayAnimation("ty_plow_pst")
+				inst.components.locomotor:Stop()
+				inst.sg:RemoveStateTag("moving")
+				inst.sg:RemoveStateTag("running")
+				inst.sg:AddStateTag("idle")
+				inst.sg.statemem.stopping = true
+				inst.sg.statemem.exitdelay = GetPloughAnimTimeout(inst, PLOUGH_PST_FRAMES)
 				return
 			end
+
 			inst.components.locomotor:RunForward()
 			TryPloughFootstep(inst)
 		end,
 
 		ontimeout = function(inst)
-			inst.sg:GoToState("ty_plough_loop")
+			inst.sg.statemem.canstop = true
+		end,
+
+		onexit = function(inst)
+			StopPloughDigSound(inst)
 		end,
 	}
 
-	local plough_pst = State{
-		name = "ty_plough_pst",
-		tags = { "canrotate", "ty_plough", "autopredict" },
-
-		onenter = function(inst)
-			inst.components.locomotor:Stop()
-			inst.AnimState:PlayAnimation("ty_plow_pst")
-		end,
-
-		events =
-		{
-			EventHandler("animover", function(inst)
-				if inst.AnimState:AnimDone() then
-					if EnsurePloughing(inst) then
-						inst.sg:GoToState("ty_plough_idle")
-					else
-						inst.sg:GoToState("idle")
-					end
-				end
-			end),
-		},
-	}
-
-	return plough_stop, plough_start, plough_idle, plough_pre, plough_loop, plough_pst
+	return plough_stop, plough_start, plough_idle, plough_move
 end
 
 local function RegisterPloughStates(sg_name, is_client)
-	local plough_stop, plough_start, plough_idle, plough_pre, plough_loop, plough_pst = MakePloughStates(is_client)
+	local plough_stop, plough_start, plough_idle, plough_move = MakePloughStates(is_client)
 	AddStategraphState(sg_name, plough_stop)
 	AddStategraphState(sg_name, plough_start)
 	AddStategraphState(sg_name, plough_idle)
-	AddStategraphState(sg_name, plough_pre)
-	AddStategraphState(sg_name, plough_loop)
-	AddStategraphState(sg_name, plough_pst)
+	AddStategraphState(sg_name, plough_move)
 end
 
 RegisterPloughStates("wilson", false)
@@ -246,6 +287,7 @@ local function ClientApplyPlough(inst)
 end
 
 local function ClientClearPlough(inst)
+	StopPloughDigSound(inst)
 	inst:RemoveTag("ty_ploughing")
 	inst.AnimState:ClearOverrideBuild(PLAYER_BUILD)
 	inst.AnimState:ClearOverrideSymbol("swap_object")
@@ -285,11 +327,14 @@ local function HookLocomote(sg)
 			local is_moving = inst.sg:HasStateTag("moving")
 			local should_move = inst.components.locomotor:WantsToMoveForward()
 			if not is_moving and should_move then
-				inst.sg:GoToState("ty_plough_pre")
+				-- idle / 收步中再按住：重新起步
+				SetLocomotorDirFromData(inst, data)
+				inst.sg:GoToState("ty_plough_move")
 				return
-			elseif is_moving and not should_move then
-				inst.sg:GoToState("ty_plough_pst")
-				return
+			end
+			-- 移动中松键：交给 ty_plough_move.onupdate 播 pst（不在这里切状态）
+			if is_moving and should_move then
+				SetLocomotorDirFromData(inst, data)
 			end
 			return
 		end
