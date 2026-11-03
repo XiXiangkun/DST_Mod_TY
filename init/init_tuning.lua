@@ -115,3 +115,13 @@ TUNING.TY_FORESTFARM_PINECONE_CHANCE = 0.2
 -- 犁：持犁移速倍率、攻击伤害（占手）
 TUNING.TY_PLOUGH_SPEED_MULT = 0.3
 -- TUNING.TY_PLOUGH_DAMAGE = 17
+
+-- 繁荣度：逻辑无上限；HUD 固定 5 位，超过显示 99999
+TUNING.TY_PROSPERITY_DISPLAY_MAX = 99999
+TUNING.TY_PROSPERITY_DIGITS = 5
+-- 解锁表（按 threshold 升序；第一期 UI 只读下一档，不执行解锁）
+TUNING.TY_PROSPERITY_UNLOCKS = {
+	{ id = "placeholder_1", threshold = 100 },
+	{ id = "placeholder_2", threshold = 500 },
+	{ id = "placeholder_3", threshold = 1000 },
+}

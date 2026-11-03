@@ -10,6 +10,8 @@ Assets = {
 	-- 小地图图标
     Asset("IMAGE", "images/ty_minimaps.tex"),
     Asset("ATLAS", "images/ty_minimaps.xml"),
+	-- 繁荣度 HUD 临时借用原版农产品秤数字动画
+	Asset("ANIM", "anim/trophyscale_oversizedveggies.zip"),
 }
 
 local ITEMS = {

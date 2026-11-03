@@ -26,6 +26,9 @@
 -- c_ty_pine()            身前生成松树
 -- c_ty_plough()          给予犁 x1
 -- c_ty_turf()            给予石砖 x20
+-- c_ty_prosperity()      打印当前繁荣度 / 下一解锁
+-- c_ty_prosperity(n)     设置繁荣度
+-- c_ty_prosperity_add(n) 增加繁荣度
 
 function c_ty_paddy()
 	local player = ConsoleCommandPlayer()
@@ -400,4 +403,32 @@ function c_ty_turf(count)
 	local item = c_give("ty_turf", count)
 	print(string.format("[ty] gave ty_turf x%d", count))
 	return item
+end
+
+function c_ty_prosperity(n)
+	if TheWorld == nil or TheWorld.components.ty_prosperity == nil then
+		print("[ty] ty_prosperity missing (host only)")
+		return
+	end
+	local comp = TheWorld.components.ty_prosperity
+	if n ~= nil then
+		comp:Set(n)
+	end
+	local next_unlock = comp:GetNextUnlock()
+	local next_str = next_unlock ~= nil
+		and string.format("%s @ %d", tostring(next_unlock.id), next_unlock.threshold or 0)
+		or "none"
+	print(string.format("[ty] prosperity=%d next=%s", comp:Get(), next_str))
+	return comp:Get()
+end
+
+function c_ty_prosperity_add(n)
+	if TheWorld == nil or TheWorld.components.ty_prosperity == nil then
+		print("[ty] ty_prosperity missing (host only)")
+		return
+	end
+	n = n or 10
+	local value = TheWorld.components.ty_prosperity:Add(n, "debug")
+	print(string.format("[ty] prosperity += %d -> %d", n, value))
+	return value
 end

@@ -10,6 +10,22 @@ local function AddPaddyManager(inst)
 	end
 end
 
+local function AddProsperityComponent(inst)
+	if inst.ismastersim then
+		inst:AddComponent("ty_prosperity")
+	end
+end
+
+-- net 挂在 world_network 上，客户端才能稳定收到 dirty
+local function AddProsperityNet(inst)
+	inst._ty_prosperity = net_uint(inst.GUID, "ty._prosperity", "ty_prosperity_dirty")
+	-- 若组件已先于 network 创建，补一次同步
+	if TheWorld.ismastersim
+		and TheWorld.components.ty_prosperity ~= nil then
+		TheWorld.components.ty_prosperity:Sync()
+	end
+end
+
 local function AddCreatureRippleScanner(inst)
 	if TheNet:IsDedicated() then
 		return
@@ -26,9 +42,12 @@ local function AddCreatureRippleScanner(inst)
 end
 
 local function OnWorld(inst)
+	AddProsperityComponent(inst)
 	AddPaddyManager(inst)
 	AddCreatureRippleScanner(inst)
 end
 
 TYENV.AddPrefabPostInit("world", OnWorld)
 TYENV.AddPrefabPostInit("cave", OnWorld)
+TYENV.AddPrefabPostInit("forest_network", AddProsperityNet)
+TYENV.AddPrefabPostInit("cave_network", AddProsperityNet)
