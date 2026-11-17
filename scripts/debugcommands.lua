@@ -16,6 +16,8 @@
 -- c_ty_fisherman_house() 身前放置渔夫小屋（世界唯一，会向世界组件注册）
 -- c_ty_fisherman_shop()  身前放置铺面（未挂牌）
 -- c_ty_license_shop()    给附近最近铺面强制挂牌（调试，不耗电子元件）
+-- c_ty_fisherman()       身前生成现有渔夫（farmer 骨架，对比用）
+-- c_ty_fisherman_w()     身前生成玩家模板渔夫（wilson + ty_w_fisherman，对比用）
 -- c_ty_farmhouse()       身前放置农家（白天会放出农妇）
 -- c_ty_tugou()           身前生成大黄狗
 -- c_ty_pethouse()        身前放置狗屋
@@ -281,6 +283,35 @@ function c_ty_license_shop()
 	end
 	TheWorld:PushEvent("ty_register_licensed_shop", shop)
 	print("[ty] licensed shop (debug, free)")
+end
+
+local function SpawnTyNpcAhead(prefab_name)
+	local player = ConsoleCommandPlayer()
+	if player == nil then
+		return
+	end
+	local x, y, z = player.Transform:GetWorldPosition()
+	local angle = (player.Transform:GetRotation() or 0) * DEGREES
+	local ent = SpawnPrefab(prefab_name)
+	if ent == nil then
+		print("[ty] failed to spawn " .. tostring(prefab_name))
+		return
+	end
+	ent.Transform:SetPosition(x + math.cos(angle) * 3, 0, z - math.sin(angle) * 3)
+	if ent.components.knownlocations ~= nil then
+		ent.components.knownlocations:RememberLocation("home", ent:GetPosition())
+	end
+	print("[ty] spawned " .. prefab_name)
+end
+
+-- 现有渔夫（farmer 骨架），仅调试对比，不挂小屋
+function c_ty_fisherman()
+	SpawnTyNpcAhead("ty_fisherman")
+end
+
+-- 玩家模板渔夫（wilson + ty_w_fisherman），仅调试对比，不进 manager
+function c_ty_fisherman_w()
+	SpawnTyNpcAhead("ty_fisherman_w")
 end
 
 function c_ty_farmhouse()

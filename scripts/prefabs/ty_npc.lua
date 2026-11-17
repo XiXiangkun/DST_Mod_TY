@@ -28,10 +28,18 @@ local function MakeNPC(def)
 		for i = 1, #hides do
 			inst.AnimState:Hide(hides[i])
 		end
+		local shows = def.show or {}
+		for i = 1, #shows do
+			inst.AnimState:Show(shows[i])
+		end
 
 		inst:AddTag("ty_npc")
 		inst:AddTag(def.tag or def.name)
 		inst:AddTag("notarget")
+		local extratags = def.tags or {}
+		for i = 1, #extratags do
+			inst:AddTag(extratags[i])
+		end
 
 		inst:AddComponent("talker")
 		inst.components.talker.fontsize = 35
@@ -112,4 +120,40 @@ MakeNPC({
 	runspeed = TUNING.TY_FARMWIFE_RUN_SPEED,
 	sg = "SGty_farmwife",
 	brain = "brains/ty_farmwifebrain",
+}),
+-- 玩家模板渔夫（调试对比用；不进小屋/manager，需 c_ty_fisherman_w 刷出）
+MakeNPC({
+	name = "ty_fisherman_w",
+	tag = "ty_fisherman_w",
+	bank = "wilson",
+	build = "ty_w_fisherman",
+	hide = {
+		"ARM_carry",
+		"HAT",
+		"HAIR_HAT",
+		"HEAD_HAT",
+		"HEAD_HAT_NOHELM",
+		"HEAD_HAT_HELM",
+		"swap_object",
+		"swap_hat",
+		"beard",
+		"hairpigtails",
+		"HAIR_pigtails",
+	},
+	show = { "ARM_normal", "HEAD" },
+	assets = {
+		Asset("ANIM", "anim/ty_w_fisherman.zip"),
+	},
+	walkspeed = TUNING.TY_FISHERMAN_WALK_SPEED,
+	runspeed = TUNING.TY_FISHERMAN_RUN_SPEED,
+	sg = "SGty_fisherman_w",
+	brain = "brains/ty_fishermanbrain",
+	master_postinit = function(inst)
+		-- 无刷时记下出生点作游荡中心（小屋不会给这个 prefab 挂 homeseeker）
+		inst:DoTaskInTime(0, function(inst)
+			if inst.components.knownlocations ~= nil then
+				inst.components.knownlocations:RememberLocation("home", inst:GetPosition())
+			end
+		end)
+	end,
 })
